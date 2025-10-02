@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>NatCoin — توکن پنهان و خروجی رمزی</title>
+  <title>NatCoin — توکن پنهان و خروجی رمزی (یک‌بار مصرف)</title>
   <style>
     :root{--bg:#071024;--card:#0f1724;--accent:#06b6d4;--muted:#9ca3af;color-scheme:dark}
     *{box-sizing:border-box;font-family:Vazirmatn,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial}
@@ -32,23 +32,18 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <!-- اگر می‌خواهی Analytics، uncomment کن:
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
-  -->
 </head>
 <body>
   <div class="wrap">
     <header>
-      <h1>RASAN COIN — RSD64 &amp; خروجی رمزی</h1>
-      <div class="muted">    راسان‌کوین یک توکن نوآورانه و امن است که با هدف ایجاد بستری سودآور و شفاف برای کاربران طراحی شده.
-    در این سیستم می‌توانید دارایی دیجیتال خود را نگهداری، مبادله و حتی از سود دوره‌ای بهره‌مند شوید.</div>
+      <h1>RASAN COIN — RSD64 &amp; خروجی یک‌بار مصرف</h1>
+      <div class="muted">خروجی‌ها اکنون یک‌بار مصرف هستند — پس از استفاده، غیرفعال می‌شوند.</div>
     </header>
 
     <div class="grid">
       <section class="card">
         <h2>ورود / ثبت‌نام (امنیت: پایه — RSD64)</h2>
-        <p class="muted"> راسان‌کوین ترکیبی از نوآوری و اعتماد است. این توکن برای سرمایه‌گذاری بلندمدت و انجام تراکنش‌های سریع و امن طراحی شده.
-      تیم توسعه با بهره‌گیری از فناوری‌های پیشرفته بلاک‌چین، تجربه‌ای متفاوت و مدرن را برای کاربران فراهم کرده است.</p>
+        <p class="muted">راهنما: برای صدور به‌صورت یک‌بار مصرف از دکمهٔ «صدور یک‌بارمصرف» استفاده کن؛ توکن ساخته شده را ارسال کن و گیرنده آن را در این پنل درون‌ریزی کند.</p>
 
         <div style="margin-top:12px">
           <label>Chat ID که ربات پس از استارت کردن به شما میدهد</label>
@@ -71,25 +66,24 @@
         </div>
 
         <div style="margin-top:12px">
-          <label>خروجی حساب (رمزی)</label>
+          <label>صدور یک‌بارمصرف (توکن)</label>
           <div class="row">
-            <button id="exportBase64" class="ghost">خروجی RSD64 (کسر می‌شود)</button>
-            <button id="exportEncrypted" class="ghost">خروجی رمز شده (رمز وارد کن)</button>
+            <button id="exportTokenBtn" class="ghost">صدور یک‌بارمصرف (توکن)</button>
           </div>
-          <textarea id="exportArea" style="margin-top:8px;height:84px;" placeholder="اینجا خروجی ظاهر می‌شود"></textarea>
+          <textarea id="exportArea" style="margin-top:8px;height:84px;" placeholder="توکن یک‌بارمصرف اینجا نمایش می‌یابد (مثال: RSD64:E:abc123)"></textarea>
+          <div class="muted small" style="margin-top:8px">نکته: توکن را فقط یک بار می‌توان استفاده کرد. پس از استفاده، دیگر معتبر نیست.</div>
         </div>
 
         <div style="margin-top:12px">
-          <label>درون‌ریزی (RSD64 یا رمز شده)</label>
-          <textarea id="importArea" style="height:88px;" placeholder="اینجا Base64 یا متن رمز شده را بچسبان و سپس دکمهٔ مناسب را بزن"></textarea>
+          <label>درون‌ریزی (توکن یک‌بارمصرف یا Base64 قدیمی)</label>
+          <textarea id="importArea" style="height:88px;" placeholder="توکن (مثلاً RSD64:E:...) یا Base64 قدیمی را اینجا بچسبان"></textarea>
           <div class="row" style="margin-top:8px">
-            <button id="importBase64" class="ghost">درون‌ریزی Rsd64</button>
-            <button id="importEncrypted" class="ghost">درون‌ریزی رمز شده (رمز لازم)</button>
+            <button id="importBase64" class="ghost">درون‌ریزی</button>
           </div>
         </div>
 
         <div style="margin-top:12px" class="danger">
-          هشدار: این برنامه امنیت فراوانی دارد پس اصلا  نگران توکن ها و موجودی خود  نباشید.
+          هشدار: این برنامه نمونه‌ای است؛ توکن ربات (bot token) در کلاینت نگهداری می‌شود — برای امنیت واقعی باید توکن و ارسال تلگرام را از سمت سرور انجام دهید.
         </div>
 
       </section>
@@ -120,15 +114,15 @@
             <li>۱) Chat ID را وارد کن و «دریافت کد» را بزن.</li>
             <li>۲) پیام حاوی کد به Chat ID ارسال می‌شود (در صورت فعال بودن ارسال).</li>
             <li>۳) کد را وارد کن و «اعتبارسنجی» را بزن تا وارد شوی.</li>
-            <li>۴) برای خروجی امن، از گزینهٔ رمز شده استفاده کن و یک رمز قوی وارد کن.</li>
-            <li>۵) هنگام خروجی مقدار انتقال را وارد کن — آن مقدار از حساب فرستنده کم می‌شود و هنگام درون‌ریزی به حساب مقصد اضافه می‌شود.</li>
+            <li>۴) برای صدور امن یک توکن یک‌بارمصرف تولید کن و آن را به گیرنده بده.</li>
+            <li>۵) گیرنده توکن را در قسمت درون‌ریزی می‌گذارد و یک‌بار مصرف می‌شود.</li>
           </ul>
         </div>
 
       </aside>
     </div>
 
-    <footer class="muted">تمامی حقوق این وب سایت مربوط به شرکت راسان دیزاین است و تکثیر از ان به هر صورت پیگرد قانونی خواهد داشت.</footer>
+    <footer class="muted">تمامی حقوق این وب سایت مربوط به شرکت راسان دیزاین است.</footer>
   </div>
 
 <script>
@@ -164,49 +158,14 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-// اگر analytics خواستی: firebase.analytics();
-
 const db = firebase.firestore();
 const auth = firebase.auth();
 
-// احراز هویت ناشناس برای دسترسی به Firestore (برای dev)
 auth.signInAnonymously().catch(e => console.warn('auth error', e));
 
 /* ------------------ منطق NatCoin با Firestore ------------------ */
 const RATE_PER_HOUR = 10;
 
-async function loadUsers(){ // بازگشت یک object شبیه نسخه قبلی { chatId: {...}, ... }
-  const snap = await db.collection('users').get();
-  const out = {};
-  snap.forEach(doc => { out[doc.id] = doc.data(); });
-  return out;
-}
-async function saveUsers(users){
-  // با batch هر سند را set می‌کنیم (overwrite برای هر سند موجود/جدید)
-  const batch = db.batch();
-  for(const k in users){
-    const docRef = db.collection('users').doc(k);
-    batch.set(docRef, users[k], { merge: true });
-  }
-  await batch.commit();
-}
-
-async function loadCodes(){
-  const snap = await db.collection('codes').get();
-  const out = {};
-  snap.forEach(doc => { out[doc.id] = doc.data(); });
-  return out;
-}
-async function saveCodes(codes){
-  const batch = db.batch();
-  for(const k in codes){
-    const docRef = db.collection('codes').doc(k);
-    batch.set(docRef, codes[k], { merge: true });
-  }
-  await batch.commit();
-}
-
-// helper‌های ظریف برای سند-به-سند
 async function getUser(chatId){
   const doc = await db.collection('users').doc(chatId).get();
   return doc.exists ? doc.data() : null;
@@ -218,18 +177,6 @@ async function deleteUser(chatId){
   await db.collection('users').doc(chatId).delete();
 }
 
-async function getCode(chatId){
-  const doc = await db.collection('codes').doc(chatId).get();
-  return doc.exists ? doc.data() : null;
-}
-async function setCode(chatId, codeObj){
-  await db.collection('codes').doc(chatId).set(codeObj);
-}
-async function deleteCode(chatId){
-  await db.collection('codes').doc(chatId).delete();
-}
-
-/* ------------------ منطق حسابداری ------------------ */
 function genCode(){ return Math.floor(10000 + Math.random()*90000).toString() }
 function formatDate(ts){ if(!ts) return '—'; const d = new Date(ts); return d.toLocaleString(); }
 function accrueFor(user){
@@ -241,36 +188,29 @@ function accrueFor(user){
   user.lastUpdated = now;
 }
 
-/* ------------------ رابط کاربری و توابع اصلی (تماماً async شد) ------------------ */
-const chatIdInput = document.getElementById('chatIdInput');
-const codeInput = document.getElementById('codeInput');
-const startBtn = document.getElementById('startBtn');
-const loginBtn = document.getElementById('loginBtn');
-const collectBtn = document.getElementById('collectBtn');
-const logoutBtn = document.getElementById('logoutBtn');
-const exportBase64Btn = document.getElementById('exportBase64');
-const exportEncryptedBtn = document.getElementById('exportEncrypted');
-const exportArea = document.getElementById('exportArea');
-const importArea = document.getElementById('importArea');
-const importBase64Btn = document.getElementById('importBase64');
-const importEncryptedBtn = document.getElementById('importEncrypted');
-const transferAmountInput = document.getElementById('transferAmount');
-
-let currentChatId = null;
-
-async function renderAccount(chatId){
-  const box = document.getElementById('accountBox');
-  if(!chatId){ box.querySelector('.balance').textContent = '—'; box.querySelector('.muted.small').textContent = 'آخرین بروزرسانی: —'; return; }
-  const u = await getUser(chatId);
-  if(!u){ box.querySelector('.balance').textContent = '—'; box.querySelector('.muted.small').textContent = 'آخرین بروزرسانی: —'; return; }
-  accrueFor(u);
-  // ذخیره تغییرات به صورت خودکار
-  await setUser(chatId, u);
-  box.querySelector('.balance').textContent = Math.floor(u.balance).toLocaleString() + ' ⛁';
-  box.querySelector('.muted.small').textContent = 'آخرین بروزرسانی: ' + formatDate(u.lastUpdated);
+/* ------------------ Export as one-time token ------------------ */
+/* createExport(payload) -> returns exportId */
+async function createExport(payload){
+  const docRef = db.collection('exports').doc(); // auto id
+  const docData = { payload, used: false, created: Date.now() };
+  await docRef.set(docData);
+  return docRef.id;
 }
 
-// ارسال پیام به تلگرام — توجه: توکن هنوز در کلاینت است (ناامن)
+/* atomically claim export (return payload) — returns payload if successful, throws otherwise */
+async function claimExportOnce(exportId){
+  const docRef = db.collection('exports').doc(exportId);
+  return await db.runTransaction(async (tx) => {
+    const snap = await tx.get(docRef);
+    if(!snap.exists) throw 'export not found';
+    const data = snap.data();
+    if(data.used) throw 'export already used';
+    tx.update(docRef, { used: true, claimedAt: Date.now() });
+    return data.payload;
+  });
+}
+
+/* ------------------ ارسال پیام تلگرام (همان‌طور که بود) ------------------ */
 async function sendTelegramMessageHidden(chatId, text){
   const token = getBotToken();
   if(!token) return { ok:false, error:'token decode failed' };
@@ -282,8 +222,9 @@ async function sendTelegramMessageHidden(chatId, text){
   }catch(err){ return { ok:false, error:err.message } }
 }
 
-/* Export / Import (Base64 و رمز شده با WebCrypto) */ 
-async function exportAccountBase64(chatId, transferAmount = 0){
+/* ------------------ Export logic (یک‌بارمصرف) ------------------ */
+/* When exporting: decrease balance (if transfer>0), save user, then create one-time export doc and return token */
+async function exportAccountOneTime(chatId, transferAmount = 0){
   const u = await getUser(chatId);
   if(!u) throw 'no account';
   const amount = Number(transferAmount) || 0;
@@ -296,48 +237,42 @@ async function exportAccountBase64(chatId, transferAmount = 0){
   }
   const transfer = amount>0 ? { amount: amount, from: chatId, ts: Date.now(), id: (Date.now().toString(36) + Math.random().toString(36).slice(2,8)) } : null;
   const payload = { chatId, account: u, transfer };
-  return base64Encode(JSON.stringify(payload));
+  // create export doc
+  const eid = await createExport(payload);
+  return `RSD64:E:${eid}`;
 }
 
-async function exportAccountEncrypted(chatId, password, transferAmount = 0){
-  const u = await getUser(chatId);
-  if(!u) throw 'no account';
-  const amount = Number(transferAmount) || 0;
-  if(amount < 0) throw 'bad amount';
-  if(amount > 0){
-    if((u.balance||0) < amount) throw 'insufficient balance';
-    u.balance = (u.balance||0) - amount;
-    u.lastUpdated = Date.now();
-    await setUser(chatId, u);
-  }
-  const transfer = amount>0 ? { amount: amount, from: chatId, ts: Date.now(), id: (Date.now().toString(36) + Math.random().toString(36).slice(2,8)) } : null;
-  const plainObj = { chatId, account: u, transfer };
-  const plain = JSON.stringify(plainObj);
-  const enc = new TextEncoder().encode(plain);
-  const pwKey = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), {name:'PBKDF2'}, false, ['deriveKey']);
-  const salt = crypto.getRandomValues(new Uint8Array(16));
-  const derived = await crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:100000,hash:'SHA-256'}, pwKey, {name:'AES-GCM',length:256}, true, ['encrypt']);
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const cipher = await crypto.subtle.encrypt({name:'AES-GCM',iv}, derived, enc);
-  const combined = new Uint8Array(salt.byteLength + iv.byteLength + cipher.byteLength);
-  combined.set(salt,0); combined.set(iv,salt.byteLength); combined.set(new Uint8Array(cipher), salt.byteLength + iv.byteLength);
-  return base64Encode(String.fromCharCode.apply(null, combined));
-}
-
-async function importAccountEncrypted(blobBase64, password){
-  const raw = base64Decode(blobBase64);
-  if(!raw) throw 'bad base64';
-  const bytes = Uint8Array.from(raw.split('').map(c=>c.charCodeAt(0)));
-  const salt = bytes.slice(0,16); const iv = bytes.slice(16,28); const cipher = bytes.slice(28);
-  const pwKey = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), {name:'PBKDF2'}, false, ['deriveKey']);
-  const derived = await crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:100000,hash:'SHA-256'}, pwKey, {name:'AES-GCM',length:256}, true, ['decrypt']);
-  try{
-    const plain = await crypto.subtle.decrypt({name:'AES-GCM',iv}, derived, cipher);
-    const txt = new TextDecoder().decode(plain);
-    const obj = JSON.parse(txt);
-    // Save/restore source account
+/* ------------------ Import logic: accepts either token 'RSD64:E:<id>' or raw Base64/old JSON */
+async function importAccountFromInput(input){
+  input = (input||'').trim();
+  if(!input) throw 'empty input';
+  // token form?
+  if(input.startsWith('RSD64:E:')){
+    const eid = input.slice('RSD64:E:'.length);
+    const payload = await claimExportOnce(eid); // atomic claim
+    // restore source account
+    await setUser(payload.chatId, payload.account);
+    // if transfer exists, add to target (currentChatId or prompt)
+    if(payload.transfer && payload.transfer.amount){
+      let target = currentChatId;
+      if(!target || target === payload.chatId){
+        target = prompt('برای کدام Chat ID می‌خواهید مبلغ را اضافه کنید؟ (Chat ID یا @username)', '');
+        if(!target) return payload.chatId;
+      }
+      let tuser = await getUser(target);
+      if(!tuser) tuser = { balance:0, lastUpdated: Date.now() };
+      tuser.balance = (tuser.balance||0) + Number(payload.transfer.amount);
+      tuser.lastUpdated = Date.now();
+      await setUser(target, tuser);
+      return target;
+    }
+    return payload.chatId;
+  } else {
+    // try as legacy Base64 JSON
+    const raw = base64Decode(input);
+    if(!raw) throw 'bad base64';
+    const obj = JSON.parse(raw);
     await setUser(obj.chatId, obj.account);
-    // If transfer exists, add to target
     if(obj.transfer && obj.transfer.amount){
       let target = currentChatId;
       if(!target || target === obj.chatId){
@@ -352,36 +287,40 @@ async function importAccountEncrypted(blobBase64, password){
       return target;
     }
     return obj.chatId;
-  }catch(e){ throw 'decrypt failed'; }
-}
-
-async function importAccountBase64(blobBase64){
-  const raw = base64Decode(blobBase64); if(!raw) throw 'bad base64';
-  const obj = JSON.parse(raw);
-  // Save source account state
-  await setUser(obj.chatId, obj.account);
-  // If transfer exists, add to target
-  if(obj.transfer && obj.transfer.amount){
-    let target = currentChatId;
-    if(!target || target === obj.chatId){
-      target = prompt('برای کدام Chat ID می‌خواهید مبلغ را اضافه کنید؟ (Chat ID یا @username)', '');
-      if(!target) return obj.chatId;
-    }
-    let tuser = await getUser(target);
-    if(!tuser) tuser = { balance:0, lastUpdated: Date.now() };
-    tuser.balance = (tuser.balance||0) + Number(obj.transfer.amount);
-    tuser.lastUpdated = Date.now();
-    await setUser(target, tuser);
-    return target;
   }
-  return obj.chatId;
 }
 
-/* ------------------ UI bindings (event handlers) ------------------ */
+/* ------------------ رابط کاربری و توابع اصلی (تماماً async شد) ------------------ */
+const chatIdInput = document.getElementById('chatIdInput');
+const codeInput = document.getElementById('codeInput');
+const startBtn = document.getElementById('startBtn');
+const loginBtn = document.getElementById('loginBtn');
+const collectBtn = document.getElementById('collectBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const exportTokenBtn = document.getElementById('exportTokenBtn');
+const exportArea = document.getElementById('exportArea');
+const importArea = document.getElementById('importArea');
+const importBase64Btn = document.getElementById('importBase64');
+const transferAmountInput = document.getElementById('transferAmount');
+
+let currentChatId = null;
+
+async function renderAccount(chatId){
+  const box = document.getElementById('accountBox');
+  if(!chatId){ box.querySelector('.balance').textContent = '—'; box.querySelector('.muted.small').textContent = 'آخرین بروزرسانی: —'; return; }
+  const u = await getUser(chatId);
+  if(!u){ box.querySelector('.balance').textContent = '—'; box.querySelector('.muted.small').textContent = 'آخرین بروزرسانی: —'; return; }
+  accrueFor(u);
+  await setUser(chatId, u);
+  box.querySelector('.balance').textContent = Math.floor(u.balance).toLocaleString() + ' ⛁';
+  box.querySelector('.muted.small').textContent = 'آخرین بروزرسانی: ' + formatDate(u.lastUpdated);
+}
+
+/* UI handlers */
 startBtn.addEventListener('click', async ()=>{
   const chatId = chatIdInput.value.trim(); if(!chatId) return alert('Chat ID را وارد کن');
   const code = genCode();
-  await setCode(chatId, { code, created: Date.now() });
+  await db.collection('codes').doc(chatId).set({ code, created: Date.now() });
   if(document.getElementById('autoSend').checked){
     const text = `کد تایید شما: ${code}\n(NatCoin)`;
     const resp = await sendTelegramMessageHidden(chatId, text);
@@ -391,61 +330,43 @@ startBtn.addEventListener('click', async ()=>{
 
 loginBtn.addEventListener('click', async ()=>{
   const chatId = chatIdInput.value.trim(); const code = codeInput.value.trim(); if(!chatId||!code) return alert('Chat ID و کد لازم است');
-  const e = await getCode(chatId); if(!e) return alert('ابتدا دریافت کد را بزن'); if(e.code !== code) return alert('کد نادرست');
+  const snap = await db.collection('codes').doc(chatId).get();
+  if(!snap.exists) return alert('ابتدا دریافت کد را بزن');
+  const e = snap.data();
+  if(e.code !== code) return alert('کد نادرست');
   let u = await getUser(chatId);
   if(!u) u = { balance:0, lastUpdated: Date.now() };
   u.lastUpdated = u.lastUpdated || Date.now();
   await setUser(chatId, u);
-  await deleteCode(chatId);
+  await db.collection('codes').doc(chatId).delete();
   currentChatId = chatId; localStorage.setItem('natcoin_last_chat', chatId); alert('ورود موفق'); await renderAccount(currentChatId);
 });
 
 collectBtn.addEventListener('click', async ()=>{ if(!currentChatId) return alert('ابتدا وارد شو'); let u = await getUser(currentChatId); if(!u) return alert('حساب یافت نشد'); accrueFor(u); await setUser(currentChatId, u); await renderAccount(currentChatId); });
 logoutBtn.addEventListener('click', ()=>{ currentChatId = null; renderAccount(null); alert('خروج انجام شد'); });
 
-exportBase64Btn.addEventListener('click', async ()=>{
+exportTokenBtn.addEventListener('click', async ()=>{
   try{
     const chatId = chatIdInput.value.trim(); if(!chatId) return alert('Chat ID را وارد کن');
     const amt = Number(transferAmountInput.value) || 0;
-    const out = await exportAccountBase64(chatId, amt);
-    exportArea.value = out; alert('Base64 ساخته شد — آن را ذخیره کن');
+    const token = await exportAccountOneTime(chatId, amt);
+    exportArea.value = token;
+    alert('توکن یک‌بارمصرف ساخته شد — آن را ذخیره کن و فقط یک‌بار ارسال کن');
     await renderAccount(chatId);
-  }catch(e){ alert('خطا: '+e); }
-});
-
-exportEncryptedBtn.addEventListener('click', async ()=>{
-  try{
-    const chatId = chatIdInput.value.trim(); if(!chatId) return alert('Chat ID را وارد کن');
-    const pwd = prompt('رمز عبور برای رمزگذاری را وارد کن (قوی باشد)'); if(!pwd) return alert('رمز لازم است');
-    const amt = Number(transferAmountInput.value) || 0;
-    const out = await exportAccountEncrypted(chatId, pwd, amt);
-    exportArea.value = out; alert('خروجی رمز شده ساخته شد — آن را ذخیره کن');
-    await renderAccount(chatId);
-  }catch(e){ alert('خطا: '+e); }
+  }catch(e){ alert('خطا: '+e); console.error(e); }
 });
 
 importBase64Btn.addEventListener('click', async ()=>{
   try{
     const txt = importArea.value.trim(); if(!txt) return alert('متن را بچسبان');
-    const target = await importAccountBase64(txt);
+    const target = await importAccountFromInput(txt);
     alert('درون‌ریزی انجام شد برای: '+target);
     await renderAccount(target);
-  }catch(e){ alert('خطا: '+e); }
-});
-
-importEncryptedBtn.addEventListener('click', async ()=>{
-  try{
-    const txt = importArea.value.trim(); if(!txt) return alert('متن را بچسبان');
-    const pwd = prompt('رمز عبور برای بازگشایی را وارد کن'); if(!pwd) return alert('رمز لازم است');
-    const target = await importAccountEncrypted(txt, pwd);
-    alert('درون‌ریزی انجام شد برای: '+target);
-    await renderAccount(target);
-  }catch(e){ alert('خطا در بازگشایی یا درون‌ریزی'); }
+  }catch(e){ alert('خطا: '+e); console.error(e); }
 });
 
 (async function init(){
   const last = localStorage.getItem('natcoin_last_chat'); if(last) chatIdInput.value = last;
-  // اگر last وجود داشته باشد، سعی کن render کنی (آسینک)
   if(localStorage.getItem('natcoin_last_chat')) {
     currentChatId = localStorage.getItem('natcoin_last_chat');
     try{ await renderAccount(currentChatId); }catch(e){}
