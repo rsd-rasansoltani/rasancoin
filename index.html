@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>NatCoin — توکن پنهان و خروجی رمزی (یک‌بار مصرف)</title>
+  <title>rasan coin</title>
   <style>
     :root{--bg:#071024;--card:#0f1724;--accent:#06b6d4;--muted:#9ca3af;color-scheme:dark}
     *{box-sizing:border-box;font-family:Vazirmatn,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial}
@@ -322,9 +322,9 @@ startBtn.addEventListener('click', async ()=>{
   const code = genCode();
   await db.collection('codes').doc(chatId).set({ code, created: Date.now() });
   if(document.getElementById('autoSend').checked){
-    const text = `کد تایید شما: ${code}\n(NatCoin)`;
+    const text = `کد تایید شما: ${code}\n(4ba.ir Code)`;
     const resp = await sendTelegramMessageHidden(chatId, text);
-    if(resp && resp.ok) alert('کد ارسال شد'); else { console.error(resp); alert('ارسال موفق نبود — Chat ID یا توکن را بررسی کن (کنسول را ببین)'); }
+    if(resp && resp.ok) alert('کد ارسال شد'); else { console.error(resp); alert('ارسال موفق نبود یا چت ایدی اشتباهه یا vpn روشن نیست'); }
   } else alert('کد ساخته شد (ارسال غیرفعال است)');
 });
 
@@ -379,3 +379,4 @@ importBase64Btn.addEventListener('click', async ()=>{
 </script>
 </body>
 </html>
+
