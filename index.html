@@ -5,28 +5,155 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>rasan coin</title>
   <style>
-    :root{--bg:#071024;--card:#0f1724;--accent:#06b6d4;--muted:#9ca3af;color-scheme:dark}
-    *{box-sizing:border-box;font-family:Vazirmatn,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial}
-    body{margin:0;min-height:100vh;background:linear-gradient(180deg,#071021 0%,#081226 100%);color:#e6eef6;display:flex;align-items:center;justify-content:center;padding:24px}
-    .wrap{width:100%;max-width:980px}
-    header{display:flex;gap:12px;align-items:center;margin-bottom:18px}
-    h1{font-size:20px;margin:0}
-    .card{background:var(--card);padding:18px;border-radius:12px;box-shadow:0 6px 24px rgba(2,6,23,.6)}
-    .grid{display:grid;grid-template-columns:1fr 340px;gap:16px}
-    label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
-    input,button,textarea,select{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
-    .muted{color:var(--muted);font-size:13px}
-    .right{display:flex;flex-direction:column;gap:12px}
-    .balance{font-size:34px;font-weight:700}
-    .small{font-size:13px}
-    .row{display:flex;gap:10px}
-    .btn{cursor:pointer;padding:10px 12px;border-radius:10px;border:0;background:linear-gradient(90deg,var(--accent),#7c3aed);color:#021024;font-weight:700}
-    .ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
-    footer{margin-top:12px;color:var(--muted);font-size:13px}
-    .notice{background:#0b2230;padding:10px;border-radius:8px;color:#bfeaf6}
-    .danger{background:#2b0b0b;color:#ffcccb;padding:10px;border-radius:8px}
-    @media(max-width:880px){.grid{grid-template-columns:1fr;}.right{order:-1}}
-  </style>
+  :root {
+    --bg: #ffffff;          /* پس‌زمینه سفید */
+    --card: #f2fef4;        /* کارت سبز خیلی روشن */
+    --accent: #1e7d32;      /* سبز اصلی */
+    --muted: #555;          /* خاکستری تیره */
+    color-scheme: light;
+  }
+
+  * {
+    box-sizing: border-box;
+    font-family: Tahoma, Arial, 'IRANSans Bold', system-ui;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: linear-gradient(180deg, #e9fdf0 0%, #ffffff 100%);
+    color: #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .wrap {
+    width: 100%;
+    max-width: 980px;
+  }
+
+  header {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+
+  h1 {
+    font-size: 22px;
+    margin: 0;
+    color: #1e7d32;
+    font-weight: bold;
+  }
+
+  .card {
+    background: var(--card);
+    padding: 18px;
+    border-radius: 12px;
+    box-shadow: 0 6px 24px rgba(0, 80, 0, 0.1);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 16px;
+  }
+
+  label {
+    display: block;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  input,
+  button,
+  textarea,
+  select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 128, 0, 0.2);
+    background: transparent;
+    color: inherit;
+  }
+
+  .muted {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .right {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .balance {
+    font-size: 34px;
+    font-weight: 700;
+    color: #1e7d32;
+  }
+
+  .small {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn {
+    cursor: pointer;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 0;
+    background: linear-gradient(90deg, #1e7d32, #4caf50);
+    color: #ffffff;
+    font-weight: 700;
+  }
+
+  .ghost {
+    background: transparent;
+    border: 1px solid rgba(0, 128, 0, 0.3);
+    color: #1e7d32;
+  }
+
+  footer {
+    margin-top: 12px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .notice {
+    background: #e6f9ec;
+    padding: 10px;
+    border-radius: 8px;
+    color: #1e7d32;
+    border: 1px solid #b2dfbc;
+  }
+
+  .danger {
+    background: #ffefef;
+    color: #a94442;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #f5c6cb;
+  }
+
+  @media (max-width: 880px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+    .right {
+      order: -1;
+    }
+  }
+</style>
 
   <!-- Firebase compat scripts (بدون module) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
