@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>مهر کوین — بخش اختصاصی | ScreenLoop</title>
+  <style>
+    :root{
+      --bg:#f7fff6;
+      --card:#ffffff;
+      --accent:#10b981; /* سبز */
+      --accent-2:#059669;
+      --muted:#6b7280;
+      --text:#05201a;
+      --glass: rgba(16,185,129,0.08);
+      --round:16px;
+      --shadow: 0 8px 30px rgba(5,32,26,0.08);
+      --container:1100px;
+      font-family: 'Vazirmatn', 'Yekan', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,var(--bg),#eafaf0);color:var(--text);}
+    .wrap{max-width:var(--container);margin:36px auto;padding:20px}
+
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;color:white;font-weight:700;box-shadow:var(--shadow)}
+    h1{font-size:20px;margin:0}
+    p.lead{margin:6px 0 0;color:var(--muted)}
+
+    .hero{display:grid;grid-template-columns:1fr 420px;gap:22px;margin-top:22px}
+    .card{background:var(--card);border-radius:var(--round);padding:26px;box-shadow:var(--shadow)}
+
+    .cta{display:flex;gap:12px;align-items:center}
+    .btn{background:var(--accent);color:white;padding:12px 18px;border-radius:12px;text-decoration:none;font-weight:600;display:inline-block}
+    .btn.secondary{background:transparent;color:var(--accent-2);border:2px solid var(--accent-2)}
+
+    .features{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:18px}
+    .feature{display:flex;gap:12px;align-items:flex-start}
+    .feature .dot{width:44px;height:44px;border-radius:10px;background:var(--glass);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent-2)}
+
+    .right-panel{position:relative}
+    .telegram-card{display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:center;height:100%;text-align:center}
+    .tg-avatar{width:96px;height:96px;border-radius:20px;background:linear-gradient(135deg,#06b6d4,#10b981);display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:28px}
+    .muted{color:var(--muted)}
+
+    section{margin-top:20px}
+    h2{margin:0 0 12px;font-size:18px}
+    .text-block{line-height:1.8;color:#0b2b22}
+
+    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .tokenomics{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+    .roadmap-list{list-style:none;padding:0;margin:0}
+    .roadmap-list li{padding:10px 12px;border-radius:10px;background:var(--glass);margin-bottom:8px}
+
+    footer{margin:28px 0 60px;text-align:center;color:var(--muted)}
+
+    /* responsive */
+    @media (max-width:980px){
+      .hero{grid-template-columns:1fr}
+      .grid-3{grid-template-columns:repeat(1,1fr)}
+      .tokenomics{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">SL</div>
+        <div>
+          <h1>ScreenLoop — بخش مهر کوین</h1>
+          <p class="lead">قصهٔ نوآوری، اعتماد و سهولت در پرداخت‌های دیجیتال</p>
+        </div>
+      </div>
+      <nav class="cta">
+        <a class="btn" href="https://t.me/mehrpay_bot" target="_blank" rel="noopener">ارتباط با ربات پرداخت</a>
+        <a class="btn secondary" href="#roadmap">نقشه راه</a>
+      </nav>
+    </header>
+
+    <main class="hero">
+      <div class="card">
+        <h2>مهر کوین چیست؟</h2>
+        <div class="text-block">
+          <p><strong>مهر کوین</strong> یک راهکار نوآورانهٔ پرداخت و توکن بومی است که توسط تیم <em>ScreenLoop</em> طراحی شده تا فرایند پرداخت‌های خرد، حق اشتراک‌ها، خیریه‌ها و تراکنش‌های درون‌سرویسی را سریع، امن و ارزان کند. مهر کوین تلاش دارد با ترکیب فناوری بلاک‌چین، توکن‌‌سازی و رابط‌های کاربری ساده، تجربه‌ای نو برای کاربران و کسب‌وکارها فراهم کند.</p>
+
+          <p>هدف مهر کوین این است که «مهر» را به عنوان نماد اعتماد و سهولت در پرداخت‌ها معرفی کند: مهر یعنی تأیید، مهر یعنی اطمینان. مهر کوین به کاربر اجازه می‌دهد تا با یک رابط ساده (مثل ربات تلگرام یا وب‌پورتال)، پرداخت‌های روزمره را بدون پیچیدگی انجام دهد.</p>
+
+          <h3 style="margin-top:16px">مزایا در یک نگاه</h3>
+          <ul>
+            <li>سرعت بالا در تأیید تراکنش‌ها</li>
+            <li>کارمزد پایین برای تراکنش‌های خرد</li>
+            <li>رابط کاربری ساده و فارسی‌زبان (ربات تلگرام + وب)</li>
+            <li>امنیت لایه‌ای و شفافیت در جزئیات تراکنش</li>
+            <li>پشتیبانی از برنامه‌های وفاداری و اشتراک</li>
+          </ul>
+
+          <p>در ادامه این صفحه، به‌صورت مفصل به همه جنبه‌های مهر کوین می‌پردازیم: تکنولوژی، توکنومیک، روش استفاده، نقشه راه، نمونه‌های کاربردی و پرسش‌های متداول.</p>
+        </div>
+
+        <section id="tech" style="margin-top:18px">
+          <h2>فناوری و امنیت</h2>
+          <div class="text-block">
+            <p>مهر کوین از یک بلاک‌چین سبک وزن یا لایهٔ دوم (Layer-2) برای تراکنش‌های سریع استفاده می‌کند تا همزمان امنیت و مقیاس‌پذیری را تضمین نماید. قراردادهای هوشمند ساده برای مدیریت کیف پول‌های سرویس، توزیع پاداش، و امتیازدهی طراحی شده‌اند.</p>
+
+            <p>لایه‌های امنیتی شامل:</p>
+            <ol>
+              <li>رمزنگاری کلید خصوصی سمت مشتری — کلیدها در اختیار خود کاربر قرار دارند.</li>
+              <li>تأیید دو مرحله‌ای برای عملیات حساس (اختیاری).</li>
+              <li>نظارت خودکار بر تراکنش‌های مشکوک و ابزارهای هشداردهی برای تیم پشتیبانی.</li>
+            </ol>
+
+            <p>ما به‌روزرسانی‌های امنیتی منظم، حسابرسی قراردادها و انتشار گزارش شفاف برای مخاطبان و شرکا را از الزامات خود می‌دانیم.</p>
+          </div>
+        </section>
+
+        <section id="usecase" style="margin-top:18px">
+          <h2>نمونه‌های کاربردی — چگونه کسب‌وکار شما از مهر کوین بهره می‌برد</h2>
+          <div class="features">
+            <div class="feature">
+              <div class="dot">1</div>
+              <div>
+                <strong>پرداخت خرد برای محتوای دیجیتال</strong>
+                <div class="muted">مناسب سایت‌های مقاله‌محور، پادکست و ویدیو که پرداخت‌های کوچک و آنی نیاز دارند.</div>
+              </div>
+            </div>
+
+            <div class="feature">
+              <div class="dot">2</div>
+              <div>
+                <strong>پرداخت اشتراک و عضویت</strong>
+                <div class="muted">مدیریت پرداخت دوره‌ای و تجدید خودکار با توکن‌های مهر.</div>
+              </div>
+            </div>
+
+            <div class="feature">
+              <div class="dot">3</div>
+              <div>
+                <strong>درگاه پرداخت برای فروشگاه‌های آنلاین کوچک</strong>
+                <div class="muted">تبدیل فرایند پرداخت پیچیده به یک دکمهٔ ساده در سایت یا ربات.</div>
+              </div>
+            </div>
+
+            <div class="feature">
+              <div class="dot">4</div>
+              <div>
+                <strong>کمک‌های بلاواسطه به خیریه‌ها</strong>
+                <div class="muted">امکان شفاف‌سازی محل هزینه‌کرد کمک‌ها و گزارش‌دهی خودکار.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <aside class="card right-panel">
+        <div class="telegram-card">
+          <div class="tg-avatar">م</div>
+          <div>
+            <h3>ربات پرداخت مهر</h3>
+            <p class="muted">برای پرداخت ساده و مدیریت کیف پول از طریق تلگرام:</p>
+            <p style="margin:6px 0"><a class="btn" href="https://t.me/mehrpay_bot" target="_blank" rel="noopener">باز کردن ربات</a></p>
+            <p class="muted" style="font-size:13px"> @mehrpay_bot</p>
+          </div>
+
+          <div style="width:100%;margin-top:10px;text-align:left" class="muted">
+            <strong>راهنما سریع:</strong>
+            <ol style="padding-left:14px;text-align:right">
+              <li>ربات را باز کنید و /start را بزنید.</li>
+              <li>کیف پول بسازید یا آدرس موجود را اضافه کنید.</li>
+              <li>مقدار مهر را وارد و تراکنش را تأیید کنید.</li>
+              <li>رسید تراکنش به‌صورت خودکار ارسال می‌شود.</li>
+            </ol>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <section class="card">
+      <h2>توکنومیک (اقتصاد توکنی)</h2>
+      <div class="tokenomics">
+        <div>
+          <p class="muted">توزیع توکن:</p>
+          <ul>
+            <li>۵۰٪ عرضه در گردش — برای تراکنش‌ها و استفاده عمومی</li>
+            <li>۲۰٪ ذخیره اکوسیستم — برای پاداش‌ها، شراکت‌ها و توسعه</li>
+            <li>۱۵٪ تیم و مشاوران — قفل‌شده برای دورهٔ تعیین‌شده</li>
+            <li>۱۰٪ صندوق رشد و بازاریابی</li>
+            <li>۵٪ خیریه و کمک‌های اجتماعی</li>
+          </ul>
+        </div>
+        <div>
+          <p class="muted">موارد مصرف و مشوق‌ها:</p>
+          <ul>
+            <li>تخفیف کارمزد برای کاربران فعال</li>
+            <li>پاداش معرفی و برنامه‌های ارجاعی</li>
+            <li>آفرهای ویژه برای کسب‌وکارهای شریک</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="roadmap">
+      <h2>نقشهٔ راه</h2>
+      <ul class="roadmap-list">
+        <li><strong>فاز ۱ — تحقیق و طراحی</strong> — تعریف نیازها، طراحی رابط‌ها، نمونهٔ اولیه ربات تلگرام.</li>
+        <li><strong>فاز ۲ — توسعهٔ اولیه</strong> — راه‌اندازی شبکهٔ آزمایشی، انتشار محدود توکن، تست امنیتی.</li>
+        <li><strong>فاز ۳ — ادغام با سرویس‌ها</strong> — درگاه‌های پرداخت، افزونه برای فروشگاه‌ها، همکاری با تولیدکنندگان محتوا.</li>
+        <li><strong>فاز ۴ — مقیاس‌پذیری</strong> — لایهٔ دوم، کاهش کارمزد، اپلیکیشن موبایل و پنل وب کامل.</li>
+        <li><strong>فاز ۵ — جامعه و رشد</strong> — برنامه‌های خیریه، باشگاه وفاداری، شفافیت مالی سالانه.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>راهنمای استفاده برای کاربران عادی</h2>
+      <div class="text-block">
+        <p><strong>شروع سریع:</strong> ربات تلگرام را باز کنید یا وارد وب‌پورتال شوید. با انتخاب «ساخت کیف پول» یک کلید خصوصی جدید برای شما تولید می‌شود (لطفاً آن را امن نگه دارید). سپس می‌توانید از گزینهٔ «دریافت» برای دیدن آدرس عمومی و از «ارسال» برای فرستادن مهر کوین استفاده کنید.</p>
+
+        <p><strong>نکات امنیتی:</strong> هرگز کلید خصوصی یا عبارت بازیابی را با دیگران به اشتراک نگذارید. برای تأمین امنیت بیشتر از رمز عبور و تأیید دومرحله‌ای استفاده کنید.</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>پرسش‌های متداول (FAQ)</h2>
+      <div>
+        <h3>آیا مهر کوین قابل تبدیل به ارزهای فیات است؟</h3>
+        <p class="muted">در مرحلهٔ اول، تمرکز بر تراکنش‌های درون‌سرویسی است. تبدیل به فیات از طریق صرافی‌ها یا پل‌های پرداخت در فازهای بعدی امکان‌پذیر خواهد شد.</p>
+
+        <h3>آیا مهر کوین پروژه‌ای متمرکز است؟</h3>
+        <p class="muted">مهر کوین ترکیبی از زیرساخت غیرمتمرکز برای تراکنش‌ها و مدیریت مرکزی برای خدمات بازرگانی و پشتیبانی دارد تا بهترین تجربه کاربری و هماهنگی سرویس‌ها تضمین شود.</p>
+
+        <h3>از کجا می‌توانم بیشتر یاد بگیرم؟</h3>
+        <p class="muted">مستندات فنی، وایت‌پیپر و کانال‌های پشتیبانی به‌زودی منتشر می‌شوند. برای دریافت به‌روزترین اطلاعیه‌ها ربات تلگرام را دنبال کنید.</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>تماس و همکاری</h2>
+      <div class="text-block">
+        <p>اگر سازمان یا کسب‌وکاری هستید که می‌خواهد مهر کوین را در خدمات خود ادغام کند، از طریق ربات <a href="https://t.me/mahrpay_bot" target="_blank" rel="noopener">@mahrpay_bot</a> تیکت ارسال کنید یا به آدرس ایمیل info@screenloop.example پیام دهید. تیم ادغام ما فرایند راه‌اندازی را در کمترین زمان ممکن انجام خواهد داد و پکیج‌های سفارشی برای کسب‌وکارها فراهم است.</p>
+      </div>
+    </section>
+
+    <footer>
+      © تمام حقوق برای ScreenLoop محفوظ است — مهر کوین • طراحی و توسعه توسط تیم ScreenLoop
+    </footer>
+  </div>
+</body>
+</html>
