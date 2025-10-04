@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>rasan coin</title>
+  <title>Mahr coin</title>
   <style>
   :root {
     --bg: #ffffff;          /* پس‌زمینه سفید */
@@ -163,13 +163,13 @@
 <body>
   <div class="wrap">
     <header>
-      <h1>RASAN COIN — RSD64 &amp; خروجی یک‌بار مصرف</h1>
+      <h1>Mahr COIN — SRLP64 &amp; خروجی یک‌بار مصرف</h1>
       <div class="muted">خروجی‌ها اکنون یک‌بار مصرف هستند — پس از استفاده، غیرفعال می‌شوند.</div>
     </header>
 
     <div class="grid">
       <section class="card">
-        <h2>ورود / ثبت‌نام (امنیت: پایه — RSD64)</h2>
+        <h2>ورود / ثبت‌نام (امنیت: پایه — SRLP64)</h2>
         <p class="muted">راهنما: برای صدور به‌صورت یک‌بار مصرف از دکمهٔ «صدور یک‌بارمصرف» استفاده کن؛ توکن ساخته شده را ارسال کن و گیرنده آن را در این پنل درون‌ریزی کند.</p>
 
         <div style="margin-top:12px">
@@ -203,14 +203,14 @@
 
         <div style="margin-top:12px">
           <label>درون‌ریزی (توکن یک‌بارمصرف یا Base64 قدیمی)</label>
-          <textarea id="importArea" style="height:88px;" placeholder="توکن (مثلاً RSD64:E:...) یا Base64 قدیمی را اینجا بچسبان"></textarea>
+          <textarea id="importArea" style="height:88px;" placeholder="توکن (مثلاً SRLP64:E:...) یا Base64 قدیمی را اینجا بچسبان"></textarea>
           <div class="row" style="margin-top:8px">
             <button id="importBase64" class="ghost">درون‌ریزی</button>
           </div>
         </div>
 
         <div style="margin-top:12px" class="danger">
-          هشدار: این برنامه نمونه‌ای است؛ توکن ربات (bot token) در کلاینت نگهداری می‌شود — برای امنیت واقعی باید توکن و ارسال تلگرام را از سمت سرور انجام دهید.
+         هشتار : هر گونه سو استفاده از این برنامه پیگرد قانونی خواهد داشت
         </div>
 
       </section>
@@ -231,7 +231,7 @@
         <div style="margin-top:12px">
           <div class="muted">تنظیمات</div>
           <div style="margin-top:8px" class="small">نرخ: <strong>10 سکه / ساعت</strong></div>
-          <div class="small">save : <strong>   4ba.ir</strong></div>
+          <div class="small">save : <strong>   screenloop.ir</strong></div>
           <div style="margin-top:8px"><label><input id="autoSend" type="checkbox" checked /> ارسال پیام با ربات</label></div>
         </div>
 
@@ -249,7 +249,7 @@
       </aside>
     </div>
 
-    <footer class="muted">تمامی حقوق این وب سایت مربوط به شرکت راسان دیزاین است.</footer>
+    <footer class="muted">تمامی حقوق این وب سایت مربوط به شرکت اسکرین لوپ است.</footer>
   </div>
 
 <script>
@@ -367,7 +367,7 @@ async function exportAccountOneTime(chatId, transferAmount = 0){
   const payload = { chatId, account: u, transfer };
   // create export doc
   const eid = await createExport(payload);
-  return `RSD64:E:${eid}`;
+  return `SRLP64:E:${eid}`;
 }
 
 /* ------------------ Import logic: accepts either token 'RSD64:E:<id>' or raw Base64/old JSON */
@@ -507,4 +507,5 @@ importBase64Btn.addEventListener('click', async ()=>{
 </script>
 </body>
 </html>
+
 
