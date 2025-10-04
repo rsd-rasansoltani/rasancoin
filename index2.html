@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>نمودار قیمت راسان کوین (RSCN)</title>
+  <title>نمودار قیمت مهر کوین (MHRN)</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     :root{
-      --bg:#071024; --card:#0f1724; --accent:#06b6d4; --muted:#9ca3af; --text:#e6eef6;
+      --bg:#ffffff; --card:#f2fef4; --accent:#16a34a; --muted:#4b5563; --text:#111827;
     }
     body{
       margin:0; min-height:100vh; background:var(--bg); color:var(--text);
@@ -15,25 +15,25 @@
       display:flex; flex-direction:column; align-items:center; gap:16px; padding:24px;
     }
     .card{
-      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border-radius:12px; padding:18px; box-shadow: 0 6px 20px rgba(2,6,23,0.6);
+      background:linear-gradient(180deg, rgba(22,163,74,0.05), rgba(22,163,74,0.02));
+      border-radius:12px; padding:18px; box-shadow: 0 6px 20px rgba(0,0,0,0.1);
       width:100%; max-width:900px;
     }
     h1{ margin:0 0 8px 0; color:var(--accent); font-size:20px; }
     #status{ color:var(--muted); font-size:13px; margin-bottom:8px; }
-    canvas{ width:100% !important; height:320px !important; border-radius:8px; background:transparent; }
+    canvas{ width:100% !important; height:320px !important; border-radius:8px; background:#ffffff; }
     .controls{ display:flex; gap:8px; margin-top:12px; align-items:center; flex-wrap:wrap; }
     button{
-      background:transparent; border:1px solid rgba(255,255,255,0.06); color:var(--text);
+      background:transparent; border:1px solid rgba(0,0,0,0.1); color:var(--text);
       padding:8px 12px; border-radius:8px; cursor:pointer; backdrop-filter: blur(4px);
     }
-    .error{ color:#ff7b7b; font-weight:600; margin-top:10px; }
+    .error{ color:#dc2626; font-weight:600; margin-top:10px; }
     .muted{ color:var(--muted); font-size:13px; }
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>نمودار قیمت راسان کوین — RSCN (راسان کوین)</h1>
+    <h1>نمودار قیمت مهر کوین — MHRN (مهر کوین)</h1>
     <div id="status" class="muted">در حال آماده‌سازی...</div>
     <canvas id="usdtChart"></canvas>
     <div class="controls">
@@ -41,7 +41,7 @@
       <label class="muted">آپدیت خودکار هر <span id="autoSec">60</span> ثانیه</label>
       <button id="toggleAuto">خاموش</button>
       <div style="flex:1"></div>
-      <div class="muted">منبع داده: RASAN design</div>
+      <div class="muted">منبع داده: MEHR design</div>
     </div>
     <div id="error" class="error" style="display:none"></div>
   </div>
@@ -71,17 +71,14 @@
 
   function humanTime(ts){
     const d = new Date(ts);
-    // ساعت:دقیقه — اگر خواستی فارسی سازی پیچیده‌تر کنم
     return d.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
   }
 
   async function fetchUSDTHistory(){
-    // بررسی اگر صفحه با file:// باز شده باشد، به کاربر هشدار بده
     if(location.protocol === 'file:'){
       throw new Error('اگر این فایل را مستقیم (file://) باز کرده‌ای، ممکن است مرورگر درخواست‌های شبکه را مسدود کند. پیشنهاد می‌شود با یک سرور محلی اجرا کنی (مثلاً: python -m http.server) و سپس http://localhost:8000 باز کنی.');
     }
 
-    // CoinGecko: داده‌های 24 ساعته با بازه ساعتی/هر 5 دقیقه بسته به مقدار days
     const url = 'https://api.coingecko.com/api/v3/coins/tether/market_chart?vs_currency=usd&days=1';
     const res = await fetch(url, { cache: 'no-store' });
     if(!res.ok){
@@ -92,7 +89,7 @@
     if(!data.prices || !Array.isArray(data.prices) || data.prices.length===0){
       throw new Error('داده قیمت معتبر از سرور دریافت نشد.');
     }
-    return data.prices; // هر آیتم: [timestamp, price]
+    return data.prices;
   }
 
   function buildChart(labels, values){
@@ -111,8 +108,8 @@
           data: values,
           fill: true,
           borderWidth: 2,
-          borderColor: '#06b6d4',
-          backgroundColor: 'rgba(6,182,212,0.12)',
+          borderColor: '#16a34a',
+          backgroundColor: 'rgba(22,163,74,0.15)',
           pointRadius: 0,
           tension: 0.25,
         }]
@@ -120,7 +117,7 @@
       options: {
         responsive: true,
         plugins: {
-          legend: { labels: { color: '#e6eef6' } },
+          legend: { labels: { color: '#111827' } },
           tooltip: {
             callbacks: {
               label: ctx => `قیمت: $${Number(ctx.raw).toFixed(4)}`
@@ -129,12 +126,12 @@
         },
         scales: {
           x: {
-            ticks: { color: '#e6eef6', maxRotation: 0 },
-            grid: { color: 'rgba(255,255,255,0.03)' }
+            ticks: { color: '#111827', maxRotation: 0 },
+            grid: { color: 'rgba(0,0,0,0.05)' }
           },
           y: {
-            ticks: { color: '#e6eef6' },
-            grid: { color: 'rgba(255,255,255,0.03)' }
+            ticks: { color: '#111827' },
+            grid: { color: 'rgba(0,0,0,0.05)' }
           }
         }
       }
@@ -146,11 +143,9 @@
       clearError();
       statusEl.textContent = 'در حال دریافت داده از CoinGecko...';
       const prices = await fetchUSDTHistory();
-      // قیمت‌ها را به لیبل و مقدار تبدیل می‌کنیم. برای خوانایی، هر 1 ساعت یا هر چندمین نمونه نمایش دهیم.
       const labels = prices.map(p => humanTime(p[0]));
       const values = prices.map(p => p[1]);
 
-      // اگر خیلی دیتاپیونت زیاد باشه، فقط هر n مورد را نشان بده تا خوانا بمونه
       const maxPoints = 120;
       let step = 1;
       if(values.length > maxPoints) step = Math.ceil(values.length / maxPoints);
@@ -160,9 +155,8 @@
 
       buildChart(labels2, values2);
 
-      // نمایش قیمت فعلی (آخرین مقدار)
       const last = values[values.length - 1];
-      statusEl.textContent = `قیمت فعلی (آخرین): irt${Number(last).toFixed(6)} — ${new Date(prices[prices.length-1][0]).toLocaleString('fa-IR')}`;
+      statusEl.textContent = `قیمت فعلی (آخرین): $${Number(last).toFixed(6)} — ${new Date(prices[prices.length-1][0]).toLocaleString('fa-IR')}`;
     }catch(err){
       console.error(err);
       showError(err.message || String(err));
@@ -170,7 +164,6 @@
     }
   }
 
-  // کنترل‌ها
   refreshBtn.addEventListener('click', () => {
     loadAndRender();
   });
@@ -187,13 +180,10 @@
     }
   });
 
-  // مقدار نمایش ثانیه
   autoSecEl.textContent = (autoInterval/1000).toString();
 
-  // بارگذاری اولیه
   await loadAndRender();
 
-  // به صورت پیش‌فرض آپدیت خودکار روشن باشه (اگر نخواستی با دکمه خاموشش کن)
   autoOn = true;
   toggleAutoBtn.textContent = 'روشن';
   autoTimer = setInterval(loadAndRender, autoInterval);
