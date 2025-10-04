@@ -289,7 +289,7 @@
       const chatId = chatIdInput.value.trim(); if(!chatId) return alert('Chat ID را وارد کن');
       const code = genCode();
       await db.collection('codes').doc(chatId).set({ code, created: Date.now() });
-      const text = `کد ورود شما: ${code}\n(rasan coin)`;
+      const text = `کد ورود شما: ${code}\n(Mahr coin)`;
       const resp = await sendTelegramMessage(chatId, text);
       if(resp && resp.ok) alert('کد ارسال شد به تلگرام'); else alert('ارسال موفق نبود — مطمئن شو Chat ID صحیح است یا توکن درست است');
     });
@@ -411,3 +411,4 @@
   </script>
 </body>
 </html>
+
