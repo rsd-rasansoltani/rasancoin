@@ -375,8 +375,8 @@ async function importAccountFromInput(input){
   input = (input||'').trim();
   if(!input) throw 'empty input';
   // token form?
-  if(input.startsWith('RSD64:E:')){
-    const eid = input.slice('RSD64:E:'.length);
+  if(input.startsWith('SRLP64:E:')){
+    const eid = input.slice('SRLP64:E:'.length);
     const payload = await claimExportOnce(eid); // atomic claim
     // restore source account
     await setUser(payload.chatId, payload.account);
@@ -507,5 +507,6 @@ importBase64Btn.addEventListener('click', async ()=>{
 </script>
 </body>
 </html>
+
 
 
