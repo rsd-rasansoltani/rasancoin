@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="fa">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Triple Dice Roller — RASAN (Firebase)</title>
+<style>
+  :root {
+    --bg-1: #f8fafc;         /* پس‌زمینه سفید خیلی روشن */
+    --bg-2: #e9fce9;         /* سبز خیلی کمرنگ */
+    --card: #ffffffcc;       /* کارت شیشه‌ای سفید */
+    --accent: #22c55e;       /* سبز اصلی */
+    --accent-2: #4ade80;     /* سبز روشن‌تر */
+    --good: #16a34a;         /* سبز تأییدی */
+    --bad: #dc2626;          /* قرمز هشدار */
+    --text: #0f172a;         /* متن تیره */
+    --muted: #64748b;        /* متن کم‌رنگ */
+    --shadow: 0 10px 30px rgba(0, 0, 0, .12);
+    --radius: 18px;
+  }
+
+  body {
+    margin: 0;
+    font-family: Vazirmatn, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial;
+    background: linear-gradient(160deg, var(--bg-1), var(--bg-2));
+    min-height: 100vh;
+    color: var(--text);
+    display: grid;
+    place-items: center;
+    padding: 20px;
+  }
+
+  .container { width: min(100%, 1100px); }
+
+  .card {
+    background: linear-gradient(180deg, rgba(255, 255, 255, .8), rgba(255, 255, 255, .6));
+    backdrop-filter: blur(14px);
+    border-radius: var(--radius);
+    padding: 18px;
+    border: 1px solid rgba(34, 197, 94, .15);
+    box-shadow: var(--shadow);
+  }
+
+  h1 { margin: 0 0 8px 0; font-size: 22px; color: var(--accent); }
+
+  .flex { display: flex; gap: 16px; }
+  .col { flex: 1; }
+
+  .panel {
+    padding: 14px;
+    border-radius: 12px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, .9), rgba(255, 255, 255, .7));
+    border: 1px solid rgba(34, 197, 94, .2);
+  }
+
+  label { display: block; color: var(--muted); font-size: 13px; margin-bottom: 6px; }
+
+  input, button, textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(34, 197, 94, .25);
+    background: transparent;
+    color: var(--text);
+  }
+
+  .muted { color: var(--muted); font-size: 13px; }
+
+  .dice-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 12px; }
+
+  .die {
+    aspect-ratio: 1;
+    border-radius: 14px;
+    background: linear-gradient(145deg, #ffffff, #e6fbe6);
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: 44px;
+    color: var(--accent);
+    box-shadow: inset 0 4px 12px rgba(0,0,0,.05);
+  }
+
+  .controls { display: flex; gap: 10px; margin-top: 8px; }
+
+  button.primary {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    color: #fff;
+    border: 0;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .15s ease;
+  }
+  button.primary:hover { transform: translateY(-2px); }
+
+  button.ghost {
+    background: transparent;
+    border: 1px solid rgba(34, 197, 94, .3);
+    color: var(--accent);
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 10px;
+    transition: background .2s;
+  }
+  button.ghost:hover { background: rgba(34, 197, 94, .08); }
+
+  .right { width: 320px; }
+
+  .status {
+    margin-top: 8px;
+    padding: 10px;
+    border-radius: 10px;
+    background: rgba(34, 197, 94, .08);
+    font-size: 14px;
+    border: 1px solid rgba(34, 197, 94, .2);
+    color: var(--accent);
+  }
+
+  .confetti { position: fixed; inset: 0; pointer-events: none; }
+
+  @media (max-width:880px){
+    .flex{flex-direction:column}
+    .right{width:100%}
+    .dice-row{grid-template-columns:repeat(3,1fr)}
+  }
+</style>
+
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="flex">
+        <div class="col panel" id="uiArea">
+          <!-- Login screen appears here when not authenticated -->
+          <div id="loginScreen">
+            <h1>ورود با تلگرام — دریافت کد</h1>
+            <div class="muted">برای ورود Chat ID را وارد کن. کدی به آن ارسال می‌شود. پس از تایید، موجودی شما بارگذاری می‌شود.</div>
+            <div style="margin-top:12px">
+              <label>Chat ID</label>
+              <input id="chatIdInput" placeholder="مثلاً: 123456789" />
+            </div>
+            <div style="margin-top:8px;display:flex;gap:8px">
+              <button id="sendCodeBtn" class="primary">ارسال کد (تلگرام)</button>
+              <button id="checkCodeBtn" class="ghost">اعتبارسنجی کد</button>
+            </div>
+            <div style="margin-top:8px">
+              <label>کد دریافتی</label>
+              <input id="codeInput" placeholder="کد 5 رقمی" />
+            </div>
+            <div class="muted" style="margin-top:8px">توجه: حداقل شرط برای بازی <strong>10000</strong> است و قبل از شرط باید موجودی کافیش را داشته باشی.</div>
+          </div>
+
+          <!-- Game screen (hidden until login) -->
+          <div id="gameScreen" style="display:none">
+            <h1>Triple Dice Roller — بازی شرطی</h1>
+            <div class="muted">موجودی و شرط را مدیریت کن. پس از قرار دادن شرط، تاس‌ها را بنداز.</div>
+
+            <div style="margin-top:12px" class="dice-row">
+              <div class="die" id="die1"><span class="value">1</span></div>
+              <div class="die" id="die2"><span class="value">1</span></div>
+              <div class="die" id="die3"><span class="value">1</span></div>
+            </div>
+
+            <div style="margin-top:8px">
+              <label>مقدار شرط (حداقل 10000)</label>
+              <input id="betAmount" type="number" min="10000" value="10000" />
+            </div>
+            <div class="controls">
+              <button id="placeBetBtn" class="primary">قرار دادن شرط</button>
+              <button id="rollBtn" class="ghost" disabled>🎲 انداختن تاس</button>
+              <button id="logoutBtn" class="ghost">خروج</button>
+            </div>
+
+            <div id="result" class="status">نتیجه: هنوز شرطی بسته نشده</div>
+
+          </div>
+        </div>
+
+        <aside class="right panel">
+          <div>
+            <div class="muted">حساب فعلی</div>
+            <div style="margin-top:10px;font-size:28px;font-weight:800" id="balance">— ⛁</div>
+            <div class="muted" id="lastUpdate">آخرین بروزرسانی: —</div>
+            <div style="margin-top:10px" class="controls">
+              <button id="refreshBtn" class="primary">بروزرسانی موجودی</button>
+              <button id="exportBtn" class="ghost">صدور یک‌بارمصرف</button>
+            </div>
+            <div style="margin-top:12px" class="muted">شناسه شما: <span id="currentChat">—</span></div>
+          </div>
+
+          <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,.04)" />
+
+          <div class="muted">راهنما</div>
+          <ul class="muted" style="padding-left:18px; margin-top:8px">
+            <li>۱) Chat ID را وارد کن و «ارسال کد» را بزن.</li>
+            <li>۲) کد را در کادر وارد کن و «اعتبارسنجی» را بزن.</li>
+            <li>۳) شرط را حداقل 10000 قرار بده و سپس تاس را بنداز.</li>
+            <li>۴) اگر مجموع تاس‌ها > 12 → شرط شما دو برابر می‌شود (اضافه می‌شود). در غیر این صورت شرط حذف می‌شود.</li>
+          </ul>
+
+          <div style="margin-top:12px" class="muted">هشدار امنیتی: توکن ربات در کلاینت ذخیره شده — برای امنیت تولید پیام‌ها بهتر است این کار از سمت سرور انجام شود.</div>
+        </aside>
+
+      </div>
+    </div>
+  </div>
+
+  <div id="confetti" class="confetti" aria-hidden="true"></div>
+
+  <!-- Firebase compat -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+  <script>
+    /* ---------- تنظیمات (نشان‌دهندهٔ توکن رمزگذاری‌شده و کلید XOR) ---------- */
+    const XOR_KEY = 'rasan_key_42';
+    // این مقدار از توکنی که فرستادی با XOR و base64 تولید شده — در کد اینجا نگهداری می‌شود و سپس در runtime رمزگشایی می‌شود
+    const ENCODED_TOKEN_XOR = 'RVhEWVZnU1NNaA5zMyQ9CA0uBAM0JWFnGy5KU11uXDIjG25iNBtGNiI8WjQBKA==';
+
+    function base64Decode(s){ try{ return atob(s); }catch(e){ return null; } }
+    function xorString(str, key){ let out=''; for(let i=0;i<str.length;i++){ out += String.fromCharCode(str.charCodeAt(i) ^ key.charCodeAt(i % key.length)); } return out; }
+    function getBotToken(){ const step1 = base64Decode(ENCODED_TOKEN_XOR); if(!step1) return null; return xorString(step1, XOR_KEY); }
+
+    async function sendTelegramMessage(chatId, text){
+      const token = getBotToken();
+      if(!token) { console.error('token decode failed'); return { ok:false, error:'token decode failed' } }
+      const url = `https://api.telegram.org/bot${encodeURIComponent(token)}/sendMessage`;
+      try{
+        const res = await fetch(url, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ chat_id: chatId, text }) });
+        const data = await res.json(); return data;
+      }catch(err){ return { ok:false, error: err.message } }
+    }
+
+    /* ---------- Firebase config (از تنظیمات شما استفاده شده) ---------- */
+    const firebaseConfig = {
+      apiKey: "AIzaSyBiHkCAzkTzUO7weLsKGXc917JNob-dhO4",
+      authDomain: "rasancoin.firebaseapp.com",
+      projectId: "rasancoin",
+      storageBucket: "rasancoin.firebasestorage.app",
+      messagingSenderId: "289625483659",
+      appId: "1:289625483659:web:b7e170072cf09a7157678e",
+      measurementId: "G-KNNM4FF9MS"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+    auth.signInAnonymously().catch(e=>console.warn(e));
+
+    /* ---------- کمک‌کننده‌ها و منطق حسابی ---------- */
+    const MIN_BET = 10000;
+    function genCode(){ return Math.floor(10000 + Math.random()*90000).toString() }
+    function formatDate(ts){ if(!ts) return '—'; return new Date(ts).toLocaleString(); }
+
+    async function getUser(chatId){ const doc = await db.collection('users').doc(chatId).get(); return doc.exists ? doc.data() : null }
+    async function setUser(chatId, userObj){ await db.collection('users').doc(chatId).set(userObj, { merge:true }) }
+
+    async function ensureUser(chatId){ let u = await getUser(chatId); if(!u){ u = { balance:0, lastUpdated: Date.now() }; await setUser(chatId,u); } return u }
+
+    async function accrueFor(user){ const now = Date.now(); if(!user.lastUpdated){ user.lastUpdated = now; return; } const elapsed = now - user.lastUpdated; const coins = elapsed / 3600000 * 10; // همان نرخ 10/h
+      user.balance = (user.balance||0) + coins; user.lastUpdated = now; }
+
+    /* ---------- UI عناصر ---------- */
+    const chatIdInput = document.getElementById('chatIdInput');
+    const codeInput = document.getElementById('codeInput');
+    const sendCodeBtn = document.getElementById('sendCodeBtn');
+    const checkCodeBtn = document.getElementById('checkCodeBtn');
+    const loginScreen = document.getElementById('loginScreen');
+    const gameScreen = document.getElementById('gameScreen');
+    const balanceEl = document.getElementById('balance');
+    const lastUpdateEl = document.getElementById('lastUpdate');
+    const currentChatEl = document.getElementById('currentChat');
+    const placeBetBtn = document.getElementById('placeBetBtn');
+    const rollBtn = document.getElementById('rollBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const betAmountInput = document.getElementById('betAmount');
+    const resultEl = document.getElementById('result');
+    const exportBtn = document.getElementById('exportBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
+
+    const diceEls = [document.getElementById('die1'), document.getElementById('die2'), document.getElementById('die3')];
+
+    let currentChatId = null;
+    let pendingBet = null; // { amount }
+
+    /* ---------- ارسال/دریافت کد ---------- */
+    sendCodeBtn.addEventListener('click', async ()=>{
+      const chatId = chatIdInput.value.trim(); if(!chatId) return alert('Chat ID را وارد کن');
+      const code = genCode();
+      await db.collection('codes').doc(chatId).set({ code, created: Date.now() });
+      const text = `کد ورود شما: ${code}\n(rasan coin)`;
+      const resp = await sendTelegramMessage(chatId, text);
+      if(resp && resp.ok) alert('کد ارسال شد به تلگرام'); else alert('ارسال موفق نبود — مطمئن شو Chat ID صحیح است یا توکن درست است');
+    });
+
+    checkCodeBtn.addEventListener('click', async ()=>{
+      const chatId = chatIdInput.value.trim(); const code = codeInput.value.trim(); if(!chatId||!code) return alert('Chat ID و کد لازم است');
+      const snap = await db.collection('codes').doc(chatId).get(); if(!snap.exists) return alert('ابتدا کد را ارسال کن');
+      const e = snap.data(); if(e.code !== code) return alert('کد اشتباه است');
+
+      // ورود موفق — بارگذاری/ایجاد حساب
+      let u = await getUser(chatId);
+      if(!u) u = { balance:0, lastUpdated: Date.now() };
+      await setUser(chatId, u);
+      await db.collection('codes').doc(chatId).delete();
+      currentChatId = chatId; localStorage.setItem('natcoin_last_chat', chatId);
+      showGame(); await renderAccount();
+      alert('ورود موفق — موجودی بارگذاری شد');
+    });
+
+    /* ---------- رندر حساب ---------- */
+    async function renderAccount(){ if(!currentChatId){ balanceEl.textContent = '— ⛁'; lastUpdateEl.textContent = 'آخرین بروزرسانی: —'; currentChatEl.textContent='—'; return; }
+      let u = await getUser(currentChatId); if(!u) u = { balance:0, lastUpdated: Date.now() };
+      await accrueFor(u); await setUser(currentChatId, u);
+      balanceEl.textContent = Math.floor(u.balance).toLocaleString() + ' ⛁'; lastUpdateEl.textContent = 'آخرین بروزرسانی: ' + formatDate(u.lastUpdated); currentChatEl.textContent = currentChatId;
+    }
+
+    refreshBtn.addEventListener('click', async ()=>{ if(!currentChatId) return alert('وارد نشده'); await renderAccount(); alert('بروزرسانی شد'); });
+
+    logoutBtn.addEventListener('click', ()=>{ currentChatId=null; localStorage.removeItem('natcoin_last_chat'); showLogin(); renderAccount(); alert('خروج انجام شد'); });
+
+    /* ---------- قرار دادن شرط (Transaction برای اطمینان) ---------- */
+    placeBetBtn.addEventListener('click', async ()=>{
+      if(!currentChatId) return alert('ابتدا وارد شو');
+      const amt = Math.floor(Number(betAmountInput.value) || 0);
+      if(amt < MIN_BET) return alert('حداقل شرط '+MIN_BET+' است');
+      try{
+        const userRef = db.collection('users').doc(currentChatId);
+        await db.runTransaction(async (tx)=>{
+          const doc = await tx.get(userRef);
+          if(!doc.exists) throw 'حساب یافت نشد';
+          const data = doc.data(); await accrueFor(data);
+          if((data.balance||0) < amt) throw 'moneynot';
+          data.balance = (data.balance||0) - amt; data.lastUpdated = Date.now();
+          tx.update(userRef, { balance: data.balance, lastUpdated: data.lastUpdated });
+        });
+        pendingBet = { amount: amt };
+        resultEl.textContent = 'شرط گذاشته شد: ' + amt.toLocaleString() + ' ⛁ — حالا تاس را بنداز';
+        rollBtn.disabled = false; placeBetBtn.disabled = true; await renderAccount();
+      }catch(err){ if(err==='moneynot') alert('موجودی کافی نیست'); else { console.error(err); alert('خطا هنگام ثبت شرط'); } }
+    });
+
+    /* ---------- انداختن تاس ---------- */
+    function rand(){ return Math.floor(Math.random()*6)+1 }
+    function animateDice(){ diceEls.forEach(d=>{ d.classList.remove('shaking'); void d.offsetWidth; d.classList.add('shaking'); }); }
+    function makeConfetti(){ const conf = document.getElementById('confetti'); for(let i=0;i<40;i++){ const piece = document.createElement('i'); piece.style.left = Math.random()*100 + 'vw'; piece.style.top = '-10px'; piece.style.width = (6+Math.random()*10)+'px'; piece.style.height = (8+Math.random()*10)+'px'; piece.style.background = `hsl(${Math.floor(Math.random()*360)} 90% 60%)`; piece.style.position='absolute'; piece.style.opacity='0.95'; piece.style.transform=`rotate(${Math.random()*360}deg)`; piece.style.animation='fall 1200ms linear forwards'; conf.appendChild(piece); setTimeout(()=>piece.remove(),1600); } }
+
+    rollBtn.addEventListener('click', async ()=>{
+      if(!pendingBet) return alert('ابتدا شرط را قرار بده');
+      rollBtn.disabled = true;
+      animateDice();
+      setTimeout(async ()=>{
+        const vals = [rand(),rand(),rand()];
+        vals.forEach((v,i)=>{ diceEls[i].querySelector('.value').textContent = v; });
+        const total = vals.reduce((a,b)=>a+b,0);
+        const win = total > 12;
+        const stake = pendingBet.amount; pendingBet = null;
+        placeBetBtn.disabled = false;
+        try{
+          const userRef = db.collection('users').doc(currentChatId);
+          if(win){
+            // award stake*2 (همان طور که خواسته بودیم شرط دو برابر شود)
+            await db.runTransaction(async (tx)=>{
+              const doc = await tx.get(userRef);
+              const data = doc.exists ? doc.data() : { balance:0, lastUpdated: Date.now() };
+              await accrueFor(data);
+              data.balance = (data.balance||0) + (stake*2);
+              data.lastUpdated = Date.now();
+              tx.set(userRef, data, { merge:true });
+            });
+            resultEl.textContent = `🎉 برد! تاس‌ها: ${vals.join(' • ')} (جمع: ${total}) — جایزه: ${ (stake*2).toLocaleString() } ⛁ اضافه شد.`;
+            makeConfetti();
+          } else {
+            // باخت — چون مبلغ هنگام شرط کسر شده بود، کاری انجام نمی‌دهیم
+            resultEl.textContent = `😔 باخت — تاس‌ها: ${vals.join(' • ')} (جمع: ${total}) — شرط شما حذف شد.`;
+          }
+        }catch(e){ console.error(e); alert('خطا در به‌روزرسانی حساب'); }
+        await renderAccount();
+      }, 800);
+    });
+
+    /* ---------- یک‌بار اجرا: بازیابی localStorage و init ---------- */
+    (async function init(){
+      const last = localStorage.getItem('natcoin_last_chat'); if(last) chatIdInput.value = last;
+      if(localStorage.getItem('natcoin_last_chat')){
+        currentChatId = localStorage.getItem('natcoin_last_chat');
+        // تلاش برای بارگذاری حساب — اما باید با کد وارد شویم تا gameScreen باز شود
+        try{ await renderAccount(); }catch(e){}
+      }
+      // نمایش مناسب
+      if(currentChatId) showLogin(); else showLogin();
+    })();
+
+    function showGame(){ loginScreen.style.display='none'; gameScreen.style.display='block'; }
+    function showLogin(){ loginScreen.style.display='block'; gameScreen.style.display='none'; placeBetBtn.disabled=false; rollBtn.disabled=true; }
+
+    exportBtn.addEventListener('click', async ()=>{
+      if(!currentChatId) return alert('ابتدا وارد شو');
+      try{
+        const u = await getUser(currentChatId); const payload = { chatId: currentChatId, account: u, created: Date.now() };
+        const docRef = await db.collection('exports').add({ payload, used:false, created: Date.now() });
+        const token = `RSD64:E:${docRef.id}`;
+        prompt('توکن یک‌بارمصرف ساخته شد — آن را کپی کن:', token);
+      }catch(e){ console.error(e); alert('خطا در صدور توکن'); }
+    });
+
+    // استایل انیمیشن fall برای کنفتی
+    const style = document.createElement('style'); style.textContent = `@keyframes fall{ to{ transform: translateY(100vh) rotate(540deg); opacity:.4 } }`; document.head.appendChild(style);
+
+  </script>
+</body>
+</html>
