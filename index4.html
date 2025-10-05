@@ -197,7 +197,7 @@
           <div class="row">
             <button id="exportTokenBtn" class="ghost">صدور یک‌بارمصرف (توکن)</button>
           </div>
-          <textarea id="exportArea" style="margin-top:8px;height:84px;" placeholder="توکن یک‌بارمصرف اینجا نمایش می‌یابد (مثال: RSD64:E:abc123)"></textarea>
+          <textarea id="exportArea" style="margin-top:8px;height:84px;" placeholder="توکن یک‌بارمصرف اینجا نمایش می‌یابد (مثال: SLRP:E:abc123)"></textarea>
           <div class="muted small" style="margin-top:8px">نکته: توکن را فقط یک بار می‌توان استفاده کرد. پس از استفاده، دیگر معتبر نیست.</div>
         </div>
 
@@ -450,7 +450,7 @@ startBtn.addEventListener('click', async ()=>{
   const code = genCode();
   await db.collection('codes').doc(chatId).set({ code, created: Date.now() });
   if(document.getElementById('autoSend').checked){
-    const text = `کد تایید شما: ${code}\n(4ba.ir Code)`;
+    const text = `کد تایید شما: ${code}\n(Screenloop Code)`;
     const resp = await sendTelegramMessageHidden(chatId, text);
     if(resp && resp.ok) alert('کد ارسال شد'); else { console.error(resp); alert('ارسال موفق نبود یا چت ایدی اشتباهه یا vpn روشن نیست'); }
   } else alert('کد ساخته شد (ارسال غیرفعال است)');
