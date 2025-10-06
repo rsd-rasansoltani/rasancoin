@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="fa">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mahr — کارت‌خوان (اسکن)</title>
+  <style>
+    :root{--bg:#f6fffb;--card:#fff;--accent:#1e7d32;--muted:#556}
+    *{box-sizing:border-box;font-family:Tahoma,Arial,'IRANSans',system-ui}
+    body{margin:0;min-height:100vh;background:linear-gradient(180deg,var(--bg),#fff);color:#033;padding:20px;display:flex;align-items:center;justify-content:center}
+    .wrap{max-width:600px;width:100%}
+    .card{background:var(--card);padding:16px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.06)}
+    label{display:block;margin-bottom:6px;color:var(--muted)}
+    input,button{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);margin-top:8px}
+    .btn{background:linear-gradient(90deg,var(--accent),#16a34a);color:#fff;border:0;cursor:pointer}
+    .muted{color:var(--muted);font-size:13px}
+    video{width:100%;margin-top:12px;border-radius:10px;display:none}
+  </style>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h2>کارت‌خوان — فقط اسکن</h2>
+      <p class="muted">چت ایدی گیرنده را وارد کنید سپس بارکد خریدار اسکن کنید و مبلغ و رمز را وارد کنید</p>
+
+      <label>Chat ID پذیرنده (Receiver)</label>
+      <input id="merchantInput" placeholder="123456789 مثال" />
+
+      <label>اسکن کارت (QR/بارکد)</label>
+      <button id="scanCard" class="btn">شروع اسکن</button>
+      <video id="preview" playsinline autoplay muted></video>
+
+      <label>مبلغ (سکه)</label>
+      <input id="amountInput" type="number" min="1" placeholder="مثال: 1000" />
+
+      <label>PIN کارت</label>
+      <input id="pinInput" type="password" placeholder="7444" />
+
+      <button id="payBtn" class="btn">پرداخت</button>
+      <div id="resultBox" class="muted" style="margin-top:12px"></div>
+    </div>
+  </div>
+
+<script>
+// firebase config — در صورت نیاز جایگزین کن
+const firebaseConfig = {
+  apiKey: "AIzaSyBiHkCAzkTzUO7weLsKGXc917JNob-dhO4",
+  authDomain: "rasancoin.firebaseapp.com",
+  projectId: "rasancoin",
+  storageBucket: "rasancoin.firebasestorage.app",
+  messagingSenderId: "289625483659",
+  appId: "1:289625483659:web:b7e170072cf09a7157678e",
+  measurementId: "G-KNNM4FF9MS"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+auth.signInAnonymously().catch(()=>{});
+
+// ساده‌سازِ عملکرد حساب (جمع‌آوری سکه بر حسب زمان)
+function accrueFor(user){
+  const now = Date.now();
+  if(!user.lastUpdated){ user.lastUpdated = now; return; }
+  const elapsed = now - user.lastUpdated;
+  const coins = elapsed / 3600000 * 10;
+  user.balance = (user.balance||0) + coins;
+  user.lastUpdated = now;
+}
+function getStoredPin(user){ return (user && user.pin) ? String(user.pin) : '7444'; }
+
+// تراکنش اتمیک در Firestore
+async function transferAtomic(cardChatId, merchantChatId, amount, suppliedPin){
+  const cardRef = db.collection('users').doc(String(cardChatId));
+  const merchantRef = db.collection('users').doc(String(merchantChatId));
+  return await db.runTransaction(async tx=>{
+    const cs = await tx.get(cardRef);
+    if(!cs.exists) throw 'کارت (حساب) پیدا نشد';
+    const ms = await tx.get(merchantRef);
+    const card = cs.data();
+    const merchant = ms.exists?ms.data():{balance:0,lastUpdated:Date.now()};
+    accrueFor(card); accrueFor(merchant);
+    const pin = getStoredPin(card);
+    if(String(suppliedPin) !== String(pin)) throw 'PIN نادرست';
+    const bal = Number(card.balance||0);
+    if(bal < amount) throw 'موجودی ناکافی';
+    card.balance = bal - Number(amount);
+    merchant.balance = (merchant.balance||0) + Number(amount);
+    card.lastUpdated = Date.now(); merchant.lastUpdated = Date.now();
+    tx.set(cardRef, card, {merge:true});
+    tx.set(merchantRef, merchant, {merge:true});
+    const txId = (Date.now().toString(36)+Math.random().toString(36).slice(2,8));
+    tx.set(db.collection('transactions').doc(txId), {from:cardChatId,to:merchantChatId,amount:Number(amount),ts:Date.now(),id:txId});
+    return {txId, newCardBalance: card.balance, newMerchantBalance: merchant.balance};
+  });
+}
+
+// Base64 unicode helpers
+function b64DecodeUnicode(str){
+  // atob -> percent-encoding -> decodeURIComponent
+  return decodeURIComponent(atob(str).split('').map(function(c){
+    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  }).join(''));
+}
+
+// extractChat: اگر ورودی لینک با #cardb64/ بود، دیکد کن.
+// همچنین اگر ورودی خودِ chatId باشد (@... یا عدد) به همان صورت برگردان.
+function extractChat(txt){
+  if(!txt) return null;
+  try{
+    const u = new URL(txt);
+    if(u.hash){
+      if(u.hash.startsWith('#card/')) return decodeURIComponent(u.hash.slice('#card/'.length));
+      if(u.hash.startsWith('#cardb64/')){
+        try{ const b = decodeURIComponent(u.hash.slice('#cardb64/'.length)); return b64DecodeUnicode(b); }catch(e){ return null; }
+      }
+    }
+  }catch(e){}
+  const m = txt.match(/#cardb64\/([^\s?#]+)/);
+  if(m){ try{ return b64DecodeUnicode(decodeURIComponent(m[1])); }catch(e){ return null; } }
+  const m2 = txt.match(/#card\/([^\s?#]+)/);
+  if(m2) return decodeURIComponent(m2[1]);
+  if(/^@/.test(txt) || /^\d+$/.test(txt)) return txt;
+  return txt;
+}
+
+
+// UI
+const scanBtn = document.getElementById('scanCard');
+const video = document.getElementById('preview');
+const payBtn = document.getElementById('payBtn');
+const merchantInput = document.getElementById('merchantInput');
+const amountInput = document.getElementById('amountInput');
+const pinInput = document.getElementById('pinInput');
+const resultBox = document.getElementById('resultBox');
+
+let scannedCardId = null;
+let activeStream = null;
+
+// اسکن با BarcodeDetector (اگر در مرورگر پشتیبانی شود)
+scanBtn.addEventListener('click', async ()=>{
+  if(!('BarcodeDetector' in window)) return alert('مرورگر شما BarcodeDetector را پشتیبانی نمی‌کند (از Chrome جدید استفاده کن)');
+  try{
+    const detector = new BarcodeDetector({formats:['qr_code','code_128','ean_13','code_39','code_93']});
+    const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    activeStream = stream;
+    video.srcObject = stream;
+    video.style.display = 'block';
+    resultBox.textContent = 'در حال اسکن — بارکد/QR را نزدیک دوربین نگه دار';
+    await video.play();
+
+    let stopped = false;
+    const stopStream = ()=>{
+      try{ stream.getTracks().forEach(t=>t.stop()); }catch(e){}
+      video.style.display = 'none';
+      stopped = true;
+      activeStream = null;
+    };
+
+    const loop = async ()=>{
+      if(stopped) return;
+      try{
+        const det = await detector.detect(video);
+        if(det && det.length){
+          const raw = det[0].rawValue.trim();
+          // raw ممکنه یک لینک باشد (مثلاً reader.html#cardb64/...)
+          const extracted = extractChat(raw);
+          scannedCardId = extracted || raw;
+          resultBox.textContent = 'کارت شناسایی شد: ' + scannedCardId;
+          stopStream();
+          return;
+        }
+      }catch(e){}
+      requestAnimationFrame(loop);
+    };
+    loop();
+
+    // اگر کاربر خواست اسکن رو متوقف کنه با کلیک صفحه
+    document.addEventListener('click', function onClickStop(){
+      if(activeStream){ try{ activeStream.getTracks().forEach(t=>t.stop()); }catch(e){} video.style.display='none'; resultBox.textContent='اسکن متوقف شد'; scannedCardId = scannedCardId || null; }
+      document.removeEventListener('click', onClickStop);
+    }, {once:true});
+
+  }catch(err){
+    alert('دسترسی به دوربین مقدور نیست یا خطا: ' + (err && err.message ? err.message : err));
+  }
+});
+
+// پرداخت
+payBtn.addEventListener('click', async ()=>{
+  const merchant = merchantInput.value.trim();
+  if(!merchant) return alert('ابتدا Chat ID پذیرنده را وارد کن');
+  if(!scannedCardId) return alert('کارت هنوز اسکن نشده');
+  const amount = Number(amountInput.value) || 0;
+  if(!amount || amount <= 0) return alert('مبلغ معتبر نیست');
+  const pin = pinInput.value.trim() || '7444';
+  if(!confirm(`آیا مطمئنی ${amount} از ${scannedCardId} برداشت و به ${merchant} واریز شود؟`)) return;
+  resultBox.textContent = 'در حال انجام تراکنش...';
+  try{8
+    const res = await transferAtomic(scannedCardId, merchant, amount, pin);
+    resultBox.innerHTML = `تراکنش موفق — شناسه: ${res.txId} — مانده کارت: ${Math.floor(res.newCardBalance)} ⛁`;
+    // پاکسازی
+    scannedCardId = null;
+  }catch(e){
+    resultBox.textContent = 'خطا: ' + String(e);
+  }
+});
+
+// صفحه بسته شد یا کاربر برگشت — استریم رو ببند
+window.addEventListener('beforeunload', ()=>{
+  try{ if(activeStream) activeStream.getTracks().forEach(t=>t.stop()); }catch(e){}
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="fa">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mahr — کارت کاربر با تایید تلگرام</title>
+  <style>
+    :root{--bg:#fff8f6;--card:#fff;--accent:#1e7d32;--muted:#556}
+    *{box-sizing:border-box;font-family:Tahoma,Arial,'IRANSans',system-ui}
+    body{margin:0;min-height:100vh;background:linear-gradient(180deg,var(--bg),#fff);color:#033;padding:20px;display:flex;align-items:center;justify-content:center}
+    .wrap{max-width:700px;width:100%}
+    .card{background:var(--card);padding:20px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.06)}
+    input,button{width:100%;padding:10px;margin-top:8px;border-radius:10px;border:1px solid rgba(0,0,0,0.06)}
+    .btn{background:linear-gradient(90deg,var(--accent),#16a34a);color:#fff;border:0;cursor:pointer}
+    .muted{color:var(--muted);font-size:14px}
+    .qr{display:flex;align-items:center;justify-content:center;padding:10px;border-radius:8px;background:#f7fff6;margin-top:10px}
+    a.link-like{word-break:break-all;color:var(--accent)}
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h2>کارت کاربر</h2>
+      <p class="muted">Chat ID خود را وارد کن، ابتدا یک کد تلگرام دریافت کن، سپس موجودی کارت را ببین و رمز (PIN) را تغییر بده.</p>
+
+      <label>Chat ID شما</label>
+      <input id="chatIdInput" placeholder="چت ایدی ربات " />
+
+      <button id="loadBtn" class="btn">دریافت کد تایید تلگرام</button>
+
+      <div id="verifyBox" style="display:none;margin-top:20px">
+        <label>کد تایید تلگرام</label>
+        <input id="codeInput" placeholder="کد دریافت شده در تلگرام" />
+        <button id="verifyBtn" class="btn">تایید کد</button>
+      </div>
+
+      <div id="cardBox" style="display:none;margin-top:20px">
+        <p><b>موجودی:</b> <span id="balance">0</span> ⛁</p>
+        <p><b>PIN فعلی:</b> <span id="pinShow">7444</span></p>
+
+        <label>تغییر رمز (PIN جدید)</label>
+        <input id="newPinInput" placeholder="مثال: 8888" />
+        <button id="updatePinBtn" class="btn">ثبت رمز جدید</button>
+
+        <div class="qr" id="qrBox"></div>
+        <p class="muted">لینک کارت شما (مراقب باشید این لینک اگر دست کسی بیفتد میتواند موجودی شما را خالی کند ): <br><a id="cardLink" class="link-like" href="#" target="_blank"></a></p>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ------------------ توکن تلگرام مخفی ------------------ */
+const XOR_KEY = 'rasan_key_42';
+const ENCODED_TOKEN_XOR = 'RVdCUl1sUlJBbw5zMyQaWR8QIxI2FwxRCi1LCCxtDhRAbVBGGA46KBptICIWKA==';
+function base64Decode(s){ try{ return atob(s); }catch(e){ return null; } }
+function xorString(str, key){
+  let out = '';
+  for(let i=0;i<str.length;i++){ out += String.fromCharCode(str.charCodeAt(i) ^ key.charCodeAt(i % key.length)); }
+  return out;
+}
+function getBotToken(){
+  const step1 = base64Decode(ENCODED_TOKEN_XOR);
+  if(!step1) return null;
+  return xorString(step1, XOR_KEY);
+}
+
+/* ------------------ Firebase ------------------ */
+const firebaseConfig = {
+  apiKey: "AIzaSyBiHkCAzkTzUO7weLsKGXc917JNob-dhO4",
+  authDomain: "rasancoin.firebaseapp.com",
+  projectId: "rasancoin",
+  storageBucket: "rasancoin.firebasestorage.app",
+  messagingSenderId: "289625483659",
+  appId: "1:289625483659:web:b7e170072cf09a7157678e",
+  measurementId: "G-KNNM4FF9MS"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+auth.signInAnonymously().catch(()=>{});
+
+/* ------------------ کمک‌ها ------------------ */
+function accrueFor(user){
+  const now = Date.now();
+  if(!user.lastUpdated){ user.lastUpdated=now; return; }
+  const elapsed=now-user.lastUpdated;
+  const coins = elapsed/3600000*10;
+  user.balance=(user.balance||0)+coins;
+  user.lastUpdated=now;
+}
+
+function b64EncodeUnicode(str){
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
+    function(match, p1){ return String.fromCharCode('0x' + p1); }));
+}
+
+/* ------------------ عملیات کارت ------------------ */
+async function loadCard(chatId){
+  const ref = db.collection('users').doc(String(chatId));
+  const doc = await ref.get();
+  let user;
+  if(doc.exists){ user = doc.data(); }
+  else { user = {balance:0,lastUpdated:Date.now(),pin:'7444'}; await ref.set(user); }
+  accrueFor(user);
+  await ref.set(user,{merge:true});
+  return user;
+}
+
+async function updatePin(chatId,newPin){
+  await db.collection('users').doc(String(chatId)).set({pin:String(newPin)},{merge:true});
+}
+
+/* ------------------ ارسال پیام تلگرام ------------------ */
+async function sendTelegramMessageHidden(chatId,text){
+  const token = getBotToken();
+  if(!token) return { ok:false, error:'token decode failed' };
+  const url = `https://api.telegram.org/bot${encodeURIComponent(token)}/sendMessage`;
+  try{
+    const res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ chat_id: chatId, text }) });
+    const data = await res.json();
+    return data;
+  }catch(err){ return { ok:false, error:err.message } }
+}
+
+/* ------------------ UI ------------------ */
+const chatIdInput = document.getElementById('chatIdInput');
+const loadBtn = document.getElementById('loadBtn');
+const verifyBox = document.getElementById('verifyBox');
+const codeInput = document.getElementById('codeInput');
+const verifyBtn = document.getElementById('verifyBtn');
+const cardBox = document.getElementById('cardBox');
+const balanceSpan = document.getElementById('balance');
+const pinShow = document.getElementById('pinShow');
+const newPinInput = document.getElementById('newPinInput');
+const updatePinBtn = document.getElementById('updatePinBtn');
+const qrBox = document.getElementById('qrBox');
+const cardLink = document.getElementById('cardLink');
+
+let currentChatId = null;
+
+loadBtn.addEventListener('click', async ()=>{
+  const chatId = chatIdInput.value.trim();
+  if(!chatId) return alert('Chat ID وارد نشده');
+
+  const code = Math.floor(10000 + Math.random()*90000).toString();
+  await db.collection('codes').doc(chatId).set({ code, created: Date.now() });
+
+  const resp = await sendTelegramMessageHidden(chatId, `کد تایید شما: ${code}`);
+  if(resp && resp.ok){
+    alert('کد تایید به تلگرام شما ارسال شد');
+    verifyBox.style.display = 'block';
+  } else {
+    alert('ارسال کد موفقیت‌آمیز نبود. Chat ID درست یا ربات فعال نیست.');
+  }
+});
+
+verifyBtn.addEventListener('click', async ()=>{
+  const chatId = chatIdInput.value.trim();
+  const inputCode = codeInput.value.trim();
+  if(!chatId || !inputCode) return alert('Chat ID و کد لازم است');
+
+  const snap = await db.collection('codes').doc(chatId).get();
+  if(!snap.exists) return alert('ابتدا دریافت کد را بزن');
+  const data = snap.data();
+  if(data.code !== inputCode) return alert('کد نادرست');
+
+  await db.collection('codes').doc(chatId).delete();
+
+  const user = await loadCard(chatId);
+  balanceSpan.textContent = Math.floor(user.balance||0);
+  pinShow.textContent = user.pin || '7444';
+  cardBox.style.display = 'block';
+
+  const b64 = b64EncodeUnicode(chatId);
+  const url = location.origin + location.pathname.replace(/[^/]*$/,'') + 'reader.html#cardb64/' + encodeURIComponent(b64);
+  cardLink.href = url;
+  cardLink.textContent = url;
+
+  qrBox.innerHTML = '';
+  QRCode.toCanvas(url, {width:200}, (err, canvas) => { if(err){ qrBox.textContent='خطا در تولید QR'; return; } qrBox.appendChild(canvas); });
+});
+
+updatePinBtn.addEventListener('click', async ()=>{
+  const chatId = chatIdInput.value.trim();
+  const newPin = newPinInput.value.trim();
+  if(!chatId) return alert('ابتدا Chat ID را بازیابی کن');
+  if(!newPin) return alert('رمز جدید وارد نشده');
+  await updatePin(chatId,newPin);
+  alert('PIN با موفقیت تغییر کرد');
+  pinShow.textContent = newPin;
+  newPinInput.value = '';
+});
+</script>
+</body>
+</html>
