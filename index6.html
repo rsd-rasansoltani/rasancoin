@@ -1,20 +1,31 @@
 <!doctype html>
-<html lang="fa">
+<html lang="fa" dir="rtl">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mahr — کارت‌خوان (اسکن)</title>
+  <title>Mahr — کارت‌خوان (تک‌صفحه‌ای)</title>
   <style>
-    :root{--bg:#f6fffb;--card:#fff;--accent:#1e7d32;--muted:#556}
+    :root{--bg:#f6fffb;--card:#fff;--accent:#1e7d32;--accent-2:#2b6cb0;--muted:#556;--danger:#c0392b}
     *{box-sizing:border-box;font-family:Tahoma,Arial,'IRANSans',system-ui}
-    body{margin:0;min-height:100vh;background:linear-gradient(180deg,var(--bg),#fff);color:#033;padding:20px;display:flex;align-items:center;justify-content:center}
-    .wrap{max-width:600px;width:100%}
-    .card{background:var(--card);padding:16px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.06)}
-    label{display:block;margin-bottom:6px;color:var(--muted)}
-    input,button{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);margin-top:8px}
-    .btn{background:linear-gradient(90deg,var(--accent),#16a34a);color:#fff;border:0;cursor:pointer}
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,var(--bg),#fff);color:#033;display:flex;align-items:center;justify-content:center;padding:18px}
+    .container{width:100%;max-width:760px}
+    .card{background:var(--card);padding:18px;border-radius:14px;box-shadow:0 12px 30px rgba(0,0,0,0.06)}
+    h1{margin:0 0 8px;font-size:20px}
+    label{display:block;margin-top:12px;color:var(--muted);font-size:13px}
+    input,button,select{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);margin-top:6px;font-size:15px}
+    .btn{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#fff;border:0;cursor:pointer}
     .muted{color:var(--muted);font-size:13px}
-    #preview{width:100%;margin-top:12px;border-radius:10px;overflow:hidden;height:300px;background:#eee;display:flex;align-items:center;justify-content:center}
+    #preview{width:100%;height:320px;border-radius:10px;overflow:hidden;background:#eee;display:flex;align-items:center;justify-content:center}
+    .row{display:flex;gap:8px}
+    .col{flex:1}
+    .small{font-size:13px;color:var(--muted)}
+    .hidden{display:none}
+    .mask{background:#f7fff7;padding:10px;border-radius:8px}
+    .summary{padding:12px;border-radius:10px;background:linear-gradient(180deg,#f8fff8,#ffffff)}
+    .ok{color:green}
+    .err{color:var(--danger)}
+    @media (max-width:520px){ #preview{height:220px} h1{font-size:18px} }
   </style>
 
   <!-- Firebase -->
@@ -26,30 +37,67 @@
   <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <h2>کارت‌خوان — فقط اسکن</h2>
-      <p class="muted">چت ایدی گیرنده را وارد کنید سپس بارکد خریدار اسکن کنید و مبلغ و رمز را وارد کنید</p>
+  <div class="container">
+    <div class="card" id="mainCard">
+      <h1>کارت‌خوان — پرداخت ایمن (تک‌صفحه‌ای)</h1>
 
-      <label>Chat ID پذیرنده (Receiver)</label>
-      <input id="merchantInput" placeholder="123456789 مثال" />
+      <!-- SECTION: SCAN -->
+      <section id="scanSection">
+        <p class="small">ابتدا Chat ID پذیرنده را وارد کن، سپس کارت/QR خریدار را اسکن کن.</p>
+        <label>Chat ID پذیرنده</label>
+        <input id="merchantInput_scan" placeholder="123456789 یا @username" />
 
-      <label>اسکن کارت (QR/بارکد)</label>
-      <button id="scanCard" class="btn">شروع اسکن</button>
-      <div id="preview">نمایش دوربین</div>
+        <label>اسکن کارت (QR/بارکد)</label>
+        <button id="scanBtn" class="btn">شروع اسکن</button>
+        <div id="preview">نمایش دوربین</div>
 
-      <label>مبلغ (سکه)</label>
-      <input id="amountInput" type="number" min="1" placeholder="مثال: 1000" />
+        <div id="scanStatus" class="small muted" style="margin-top:10px">هیچ کارتی اسکن نشده.</div>
+      </section>
 
-      <label>PIN کارت</label>
-      <input id="pinInput" type="password" placeholder="7444" />
+      <!-- SECTION: TRANSACTION -->
+      <section id="txSection" class="hidden">
+        <p class="small">اطلاعات تراکنش را وارد کن. پین به صورت مخفی نمایش داده می‌شود و کد یک‌بارمصرف به صاحب کارت ارسال خواهد شد.</p>
 
-      <button id="payBtn" class="btn">پرداخت</button>
-      <div id="resultBox" class="muted" style="margin-top:12px"></div>
+        <label>کارت (پرداخت‌شونده)</label>
+        <div id="maskedCard" class="mask">—</div>
+
+        <label>Chat ID پذیرنده</label>
+        <input id="merchantInput" placeholder="Chat ID پذیرنده" />
+
+        <label>مبلغ (سکه)</label>
+        <input id="amountInput" type="number" min="1" placeholder="مثال: 1000" />
+
+        <label>PIN کارت (پنهان)</label>
+        <input id="pinInput" type="password" placeholder="پین کارت" />
+
+        <div class="row">
+          <div class="col"><button id="sendOtpBtn" class="btn">ارسال کد یک‌بارمصرف</button></div>
+          <div class="col"><button id="cancelTx" class="btn" style="background:linear-gradient(90deg,#e74c3c,#c0392b)">لغو</button></div>
+        </div>
+
+        <label>کد یک‌بارمصرف</label>
+        <input id="otpInput" placeholder="کد ۵ رقمی" />
+
+        <button id="confirmBtn" class="btn" style="margin-top:8px">تایید و انجام تراکنش</button>
+
+        <div id="txStatus" class="small muted" style="margin-top:10px"></div>
+      </section>
+
+      <!-- SECTION: SUMMARY (only shown after success) -->
+      <section id="summarySection" class="hidden">
+        <h2>خلاصهٔ تراکنش</h2>
+        <div id="summaryBox" class="summary">در حال بارگذاری...</div>
+        <div style="margin-top:12px" class="row">
+          <div class="col"><button id="newPayBtn" class="btn">پرداخت جدید</button></div>
+          <div class="col"><button id="finishBtn" class="btn" style="background:linear-gradient(90deg,#667eea,#764ba2)">پایان</button></div>
+        </div>
+      </section>
+
     </div>
   </div>
 
 <script>
+/* --------------------------- config --------------------------- */
 const firebaseConfig = {
   apiKey: "AIzaSyBiHkCAzkTzUO7weLsKGXc917JNob-dhO4",
   authDomain: "rasancoin.firebaseapp.com",
@@ -64,33 +112,38 @@ const db = firebase.firestore();
 const auth = firebase.auth();
 auth.signInAnonymously().catch(()=>{});
 
-function accrueFor(user){
-  const now = Date.now();
-  if(!user.lastUpdated){ user.lastUpdated = now; return; }
-  const elapsed = now - user.lastUpdated;
-  const coins = elapsed / 3600000 * 10;
-  user.balance = (user.balance||0) + coins;
-  user.lastUpdated = now;
-}
-function getStoredPin(user){ return (user && user.pin) ? String(user.pin) : '7444'; }
+/* --------------------------- helpers --------------------------- */
+function maskId(id){ if(!id) return '—'; const s=String(id); if(s.length>6) return s.slice(0,2)+'•••••'+s.slice(-2); return s.replace(/.(?=.$)/g,'*'); }
+function qs(name){ return new URLSearchParams(location.search).get(name); }
+function genOtp(){ return Math.floor(10000+Math.random()*90000).toString(); }
 
+/* --------------------------- hidden bot token logic --------------------------- */
+const XOR_KEY = 'rasan_key_42';
+const ENCODED_TOKEN_XOR = 'RVdCUl1sUlJBbw5zMyQaWR8QIxI2FwxRCi1LCCxtDhRAbVBGGA46KBptICIWKA==';
+function base64Decode(s){ try{ return atob(s); }catch(e){ return null; } }
+function xorString(str,key){ let out=''; for(let i=0;i<str.length;i++) out+=String.fromCharCode(str.charCodeAt(i)^key.charCodeAt(i%key.length)); return out; }
+function getBotToken(){ const step1=base64Decode(ENCODED_TOKEN_XOR); if(!step1) return null; return xorString(step1,XOR_KEY); }
+async function sendTelegramMessageHidden(chatId,text){ const token=getBotToken(); if(!token) return {ok:false,error:'token decode failed'}; const url=`https://api.telegram.org/bot${encodeURIComponent(token)}/sendMessage`; try{ const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:chatId,text})}); return await res.json(); }catch(e){ return {ok:false,error:e.message}; } }
+
+/* --------------------------- transfer logic --------------------------- */
 async function transferAtomic(cardChatId, merchantChatId, amount, suppliedPin){
   const cardRef = db.collection('users').doc(String(cardChatId));
   const merchantRef = db.collection('users').doc(String(merchantChatId));
   return await db.runTransaction(async tx=>{
     const cs = await tx.get(cardRef);
-    if(!cs.exists) throw 'کارت (حساب) پیدا نشد';
-    const ms = await tx.get(merchantRef);
+    if(!cs.exists) throw 'حساب کارت پیدا نشد';
     const card = cs.data();
+    const ms = await tx.get(merchantRef);
     const merchant = ms.exists?ms.data():{balance:0,lastUpdated:Date.now()};
-    accrueFor(card); accrueFor(merchant);
-    const pin = getStoredPin(card);
+    const now = Date.now();
+    card.lastUpdated = card.lastUpdated || now; merchant.lastUpdated = merchant.lastUpdated || now;
+    const pin = (card.pin?String(card.pin):'7444');
     if(String(suppliedPin) !== String(pin)) throw 'PIN نادرست';
     const bal = Number(card.balance||0);
     if(bal < amount) throw 'موجودی ناکافی';
     card.balance = bal - Number(amount);
     merchant.balance = (merchant.balance||0) + Number(amount);
-    card.lastUpdated = Date.now(); merchant.lastUpdated = Date.now();
+    card.lastUpdated = now; merchant.lastUpdated = now;
     tx.set(cardRef, card, {merge:true});
     tx.set(merchantRef, merchant, {merge:true});
     const txId = (Date.now().toString(36)+Math.random().toString(36).slice(2,8));
@@ -99,88 +152,150 @@ async function transferAtomic(cardChatId, merchantChatId, amount, suppliedPin){
   });
 }
 
-function b64DecodeUnicode(str){
-  return decodeURIComponent(atob(str).split('').map(c=>('%' + ('00'+c.charCodeAt(0).toString(16)).slice(-2))).join(''));
-}
-
-function extractChat(txt){
-  if(!txt) return null;
-  try{
-    const u = new URL(txt);
-    if(u.hash){
-      if(u.hash.startsWith('#card/')) return decodeURIComponent(u.hash.slice('#card/'.length));
-      if(u.hash.startsWith('#cardb64/')){
-        try{ const b = decodeURIComponent(u.hash.slice('#cardb64/'.length)); return b64DecodeUnicode(b); }catch(e){ return null; }
-      }
-    }
-  }catch(e){}
-  const m = txt.match(/#cardb64\/([^\s?#]+)/);
-  if(m){ try{ return b64DecodeUnicode(decodeURIComponent(m[1])); }catch(e){ return null; } }
-  const m2 = txt.match(/#card\/([^\s?#]+)/);
-  if(m2) return decodeURIComponent(m2[1]);
-  if(/^@/.test(txt) || /^\d+$/.test(txt)) return txt;
-  return txt;
-}
-
-// UI
-const scanBtn = document.getElementById('scanCard');
-const previewDiv = document.getElementById('preview');
-const payBtn = document.getElementById('payBtn');
+/* --------------------------- UI wiring --------------------------- */
+const scanSection = document.getElementById('scanSection');
+const txSection = document.getElementById('txSection');
+const summarySection = document.getElementById('summarySection');
+const preview = document.getElementById('preview');
+const scanStatus = document.getElementById('scanStatus');
+const scanBtn = document.getElementById('scanBtn');
+const maskedCardEl = document.getElementById('maskedCard');
+const merchantInput_scan = document.getElementById('merchantInput_scan');
 const merchantInput = document.getElementById('merchantInput');
 const amountInput = document.getElementById('amountInput');
 const pinInput = document.getElementById('pinInput');
-const resultBox = document.getElementById('resultBox');
+const sendOtpBtn = document.getElementById('sendOtpBtn');
+const otpInput = document.getElementById('otpInput');
+const confirmBtn = document.getElementById('confirmBtn');
+const txStatus = document.getElementById('txStatus');
+const cancelTx = document.getElementById('cancelTx');
+const newPayBtn = document.getElementById('newPayBtn');
+const finishBtn = document.getElementById('finishBtn');
+const summaryBox = document.getElementById('summaryBox');
 
-let scannedCardId = null;
 let html5QrcodeScanner = null;
+let scannedCardId = null;
 
-// اسکن با html5-qrcode
-scanBtn.addEventListener('click', () => {
+function showSection(s){ scanSection.classList.add('hidden'); txSection.classList.add('hidden'); summarySection.classList.add('hidden'); s.classList.remove('hidden'); }
+
+/* --------------------------- scanning --------------------------- */
+scanBtn.addEventListener('click', ()=>{
   if(html5QrcodeScanner) return;
-  resultBox.textContent = 'در حال اسکن — بارکد/QR را نزدیک دوربین نگه دارید';
-  
-  html5QrcodeScanner = new Html5Qrcode("preview");
-
-  html5QrcodeScanner.start(
-    { facingMode: "environment" }, 
-    { fps: 10, qrbox: 250 }, 
-    qrCodeMessage => {
-      scannedCardId = extractChat(qrCodeMessage) || qrCodeMessage;
-      resultBox.textContent = 'کارت شناسایی شد: ' + scannedCardId;
-      html5QrcodeScanner.stop();
-      html5QrcodeScanner = null;
-    },
-    errorMessage => {
-      // خطاهای اسکن را می‌توان نادیده گرفت
-    }
-  ).catch(err => {
-    alert('خطا در دسترسی به دوربین یا اسکن: ' + err);
-  });
+  scanStatus.textContent = 'در حال اسکن — بارکد/QR را نزدیک دوربین نگه دارید';
+  html5QrcodeScanner = new Html5Qrcode('preview');
+  html5QrcodeScanner.start({facingMode:'environment'},{fps:10,qrbox:250}, qrCodeMessage => {
+    // extract chat (simple heuristics)
+    let card = extractChat(qrCodeMessage)||qrCodeMessage;
+    scannedCardId = card;
+    maskAndOpen(card);
+    html5QrcodeScanner.stop().catch(()=>{}).then(()=>{ html5QrcodeScanner = null; });
+  }, err=>{ /* ignore scan errors */ }).catch(e=>{ alert('دسترسی دوربین یا اسکن مشکل دارد: '+e); });
 });
 
-// پرداخت
-payBtn.addEventListener('click', async ()=>{
-  const merchant = merchantInput.value.trim();
-  if(!merchant) return alert('ابتدا Chat ID پذیرنده را وارد کن');
-  if(!scannedCardId) return alert('کارت هنوز اسکن نشده');
-  const amount = Number(amountInput.value) || 0;
-  if(!amount || amount <= 0) return alert('مبلغ معتبر نیست');
-  const pin = pinInput.value.trim() || '7444';
-  if(!confirm(`آیا مطمئنی ${amount} از ${scannedCardId} برداشت و به ${merchant} واریز شود؟`)) return;
-  resultBox.textContent = 'در حال انجام تراکنش...';
+function extractChat(txt){ if(!txt) return null; try{ const u=new URL(txt); if(u.hash){ if(u.hash.startsWith('#card/')) return decodeURIComponent(u.hash.slice('#card/'.length)); if(u.hash.startsWith('#cardb64/')){ try{ const b = decodeURIComponent(u.hash.slice('#cardb64/'.length)); return b64DecodeUnicode(b); }catch(e){} } } }catch(e){} const m = txt.match(/#cardb64\/([^\s?#]+)/); if(m){ try{ return b64DecodeUnicode(decodeURIComponent(m[1])); }catch(e){} } const m2 = txt.match(/#card\/([^\s?#]+)/); if(m2) return decodeURIComponent(m2[1]); if(/^@/.test(txt) || /^\d+$/.test(txt)) return txt; return txt; }
+function b64DecodeUnicode(str){ return decodeURIComponent(atob(str).split('').map(c=>('%'+('00'+c.charCodeAt(0).toString(16)).slice(-2))).join('')); }
+
+function maskAndOpen(card){ maskedCardEl.textContent = maskId(card); merchantInput.value = merchantInput_scan.value.trim(); scanStatus.textContent = 'کارت شناسایی شد: '+maskId(card);
+  // clear sensitive fields
+  pinInput.value = '';
+  otpInput.value = '';
+  txStatus.textContent = '';
+  // show tx section
+  showSection(txSection);
+}
+
+/* --------------------------- OTP flow --------------------------- */
+async function createAndSendOtp(cardChatId){
+  const code = genOtp();
+  const doc = { code, card: cardChatId, created: Date.now(), used:false, expires: Date.now()+2*60*1000 };
+  const docRef = await db.collection('otps').add(doc);
+  const text = `کد یک‌بارمصرف تراکنش شما: ${code}\nاین کد تا 2 دقیقه معتبر است.`;
+  // attempt to send; ignore failures but log
+  sendTelegramMessageHidden(cardChatId, text).catch(console.warn);
+  return { id: docRef.id, code };
+}
+
+sendOtpBtn.addEventListener('click', async ()=>{
+  if(!scannedCardId) return alert('ابتدا کارت را اسکن کن');
+  sendOtpBtn.disabled = true; txStatus.textContent = 'در حال ایجاد و ارسال کد...';
+  try{ await createAndSendOtp(scannedCardId); txStatus.textContent = 'کد ارسال شد — لطفاً آن را از تلگرام صاحب کارت بردار و وارد کن'; }catch(e){ txStatus.textContent = 'خطا در ارسال کد: '+e; }
+  sendOtpBtn.disabled = false;
+});
+
+/* --------------------------- confirm transaction --------------------------- */
+confirmBtn.addEventListener('click', async ()=>{
+  const merchant = (document.getElementById('merchantInput').value||'').trim();
+  const amount = Number(amountInput.value)||0;
+  const pin = (pinInput.value||'').trim() || '7444';
+  const otp = (otpInput.value||'').trim();
+  if(!scannedCardId) return alert('کارت مشخص نیست');
+  if(!merchant) return alert('Chat ID پذیرنده را وارد کن');
+  if(!amount || amount<=0) return alert('مبلغ معتبر نیست');
+  if(!otp) return alert('کد یکبارمصرف را وارد کن');
+
+  confirmBtn.disabled = true; txStatus.textContent = 'در حال اعتبارسنجی کد...';
   try{
+    // validate OTP (search recent otps for this card)
+    const snap = await db.collection('otps').where('card','==',scannedCardId).orderBy('created','desc').limit(10).get();
+    let found = null;
+    snap.forEach(s=>{ const d=s.data(); if(!found && !d.used && d.code===otp && d.expires > Date.now()) found = { id:s.id, data:d }; });
+    if(!found) throw 'کد یکبارمصرف نادرست یا منقضی‌شده';
+
+    // mark OTP used
+    await db.collection('otps').doc(found.id).update({ used:true, usedAt:Date.now() });
+
+    // pending record (prevents replay) — unique id per attempt
+    const pendingId = 'p_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,6);
+    const pendingRef = db.collection('pendingTransactions').doc(pendingId);
+    await pendingRef.set({ card:scannedCardId, merchant, amount, status:'pending', created:Date.now() });
+
+    txStatus.textContent = 'در حال انجام تراکنش...';
     const res = await transferAtomic(scannedCardId, merchant, amount, pin);
-    resultBox.innerHTML = `تراکنش موفق — شناسه: ${res.txId} — مانده کارت: ${Math.floor(res.newCardBalance)} ⛁`;
-    scannedCardId = null;
-  }catch(e){
-    resultBox.textContent = 'خطا: ' + String(e);
-  }
+
+    // mark pending done
+    await pendingRef.update({ status:'done', txId: res.txId, doneAt: Date.now() });
+
+    // clean sensitive inputs
+    pinInput.value = ''; otpInput.value = '';
+
+    // show summary — NO historical data queried before this point (privacy)
+    await showSummary(res.txId);
+  }catch(e){ txStatus.textContent = 'خطا: '+String(e); confirmBtn.disabled = false; }
 });
 
-// پاکسازی هنگام خروج
-window.addEventListener('beforeunload', ()=>{
-  if(html5QrcodeScanner) html5QrcodeScanner.stop().catch(()=>{});
+async function showSummary(txId){ // fetch transaction doc and display
+  try{
+    const snap = await db.collection('transactions').doc(txId).get();
+    if(!snap.exists) { summaryBox.textContent = 'تراکنش ثبت شده ولی جزئیات یافت نشد'; }
+    else{
+      const d = snap.data();
+      summaryBox.innerHTML = `<div><strong>شناسه:</strong> ${d.id}</div><div><strong>از:</strong> ${maskId(d.from)}</div><div><strong>به:</strong> ${maskId(d.to)}</div><div><strong>مبلغ:</strong> ${d.amount} ⛁</div><div class=\"small muted\">زمان: ${new Date(d.ts).toLocaleString()}</div>`;
+    }
+    // hide other sections and show summary
+    showSection(summarySection);
+    // store last tx in sessionStorage (volatile) for potential use — won't be visible until after tx
+    sessionStorage.setItem('mahr_last_tx', txId);
+  }catch(e){ summaryBox.textContent = 'خطا در نمایش خلاصه: '+e; showSection(summarySection); }
+}
+
+/* --------------------------- cancel / new pay / finish handlers --------------------------- */
+cancelTx.addEventListener('click', ()=>{ // go back to scan
+  scannedCardId = null; maskedCardEl.textContent = '—'; merchantInput_scan.value = merchantInput.value = ''; amountInput.value = ''; pinInput.value=''; otpInput.value=''; txStatus.textContent='لغو شد'; showSection(scanSection); });
+
+newPayBtn.addEventListener('click', ()=>{ // reset and go to scan for new payment
+  scannedCardId = null; maskedCardEl.textContent = '—'; merchantInput_scan.value = merchantInput.value = ''; amountInput.value = ''; pinInput.value=''; otpInput.value=''; summaryBox.textContent='—'; showSection(scanSection); });
+
+finishBtn.addEventListener('click', ()=>{ // final step: clean and remain on summary
+  // clear any local sensitive traces
+  scannedCardId = null; pinInput.value=''; otpInput.value=''; amountInput.value='';
+  // do not show history; keep summary visible
+  txStatus.textContent = '';
 });
+
+/* --------------------------- init --------------------------- */
+showSection(scanSection);
+window.addEventListener('beforeunload', ()=>{ if(html5QrcodeScanner) html5QrcodeScanner.stop().catch(()=>{}); });
+
 </script>
 </body>
 </html>
