@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>صفحه پیدا نشد — 404</title>
+  <style>
+    :root {
+      --bg: #f7f9fc;
+      --text: #2c3e50;
+      --accent: #007bff;
+      --card: #ffffff;
+      --radius: 16px;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --text: #e2e8f0;
+      --accent: #38bdf8;
+      --card: #1e293b;
+    }
+    * {
+      box-sizing: border-box;
+      font-family: "Vazir", sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      flex-direction: column;
+      text-align: center;
+      transition: background 0.4s, color 0.4s;
+    }
+    .card {
+      background: var(--card);
+      padding: 3rem 2rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      max-width: 480px;
+      width: 90%;
+      animation: fadeIn 1s ease forwards;
+    }
+    h1 {
+      font-size: 5rem;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+    p {
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+      line-height: 1.8;
+    }
+    a {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      padding: 0.8rem 1.6rem;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+    a:hover {
+      background: #0056b3;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .moon {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: var(--card);
+      border: none;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: 0.4s;
+    }
+  </style>
+</head>
+<body>
+  <button class="moon" id="toggleTheme">🌙</button>
+  <div class="card">
+    <h1>404</h1>
+    <p>متأسفیم! صفحه‌ای که به دنبال آن هستید پیدا نشد.<br>ممکن است حذف شده باشد یا آدرس اشتباه باشد.</p>
+    <a href="https://mehrPay_bot.t.me">بازگشت به صفحه اصلی</a>
+  </div>
+
+  <script>
+    const btn = document.getElementById('toggleTheme');
+    btn.addEventListener('click', () => {
+      const isDark = document.body.getAttribute('data-theme') === 'dark';
+      document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      btn.textContent = isDark ? '🌙' : '☀️';
+    });
+  </script>
+</body>
+</html>
