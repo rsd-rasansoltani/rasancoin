@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>کارت‌به‌کارت — کد پویا (فقط به فرستنده)</title>
+  <style>
+    :root{ --bg:#ffffff; --card:#f7fff7; --accent:#1e7d32; --muted:#5a5a5a }
+    *{box-sizing:border-box;font-family:Tahoma, Arial, 'IRANSans', system-ui}
+    body{margin:0;min-height:100vh;background:linear-gradient(180deg,#f0fff4 0,#ffffff 100%);display:flex;align-items:center;justify-content:center;padding:20px}
+    .wrap{width:100%;max-width:680px}
+    header{display:flex;gap:12px;align-items:center;margin-bottom:14px}
+    h1{margin:0;color:var(--accent);font-size:20px}
+    .card{background:var(--card);padding:16px;border-radius:12px;box-shadow:0 8px 30px rgba(0,80,0,0.06)}
+    label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+    input,textarea,select,button{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,128,0,0.12);background:transparent;color:inherit}
+    .row{display:flex;gap:8px}
+    .btn{cursor:pointer;padding:10px 12px;border-radius:10px;border:0;background:linear-gradient(90deg,var(--accent),#4caf50);color:#fff;font-weight:700}
+    .ghost{background:transparent;border:1px solid rgba(0,128,0,0.18);color:var(--accent)}
+    .code{font-family:monospace;background:#fff;padding:8px 10px;border-radius:8px;border:1px dashed rgba(0,0,0,0.06);user-select:text;}
+    .panel{background:#ffffff;padding:12px;border-radius:10px;border:1px solid rgba(0,0,0,0.04);}
+    footer{margin-top:12px;color:var(--muted);font-size:13px}
+    .success{background:#e6f9ec;border:1px solid #b2dfbc;padding:10px;border-radius:8px;color:#1e7d32}
+    .danger{background:#ffefef;border:1px solid #f5c6cb;padding:10px;border-radius:8px;color:#a94442}
+  </style>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>کارت‌به‌کارت — مهر پای (10.10.202)</h1>
+      <div class="small muted">ورودی: چت‌آیدی فرستنده، مبلغ، چت‌آیدی گیرنده — سپس دریافت کد پویا و ارسال آن فقط به فرستنده</div>
+    </header>
+
+    <div class="card">
+      <section>
+        <h2>ایجاد کد پویا</h2>
+        <div style="margin-top:12px">
+          <label>Chat ID فرستنده</label>
+          <input id="srcChat" placeholder="مثال: 123456789" />
+        </div>
+
+        <div style="margin-top:12px">
+          <label>مبلغ (تومان)</label>
+          <input id="amount" type="number" min="1" step="1" placeholder="مثال: 150000" />
+        </div>
+
+        <div style="margin-top:12px">
+          <label>Chat ID گیرنده (نمایش در پیام)</label>
+          <input id="targetChat" placeholder="Chat ID گیرنده یا " />
+        </div>
+
+        <div style="margin-top:12px" class="row">
+          <button id="genCodeBtn" class="btn">دریافت کد پویا</button>
+          <button id="clearBtn" class="ghost">پاک کردن فرم</button>
+        </div>
+        
+        <hr style="margin:12px 0" />
+
+        <h3>وارد کردن کد پویا و تایید</h3>
+        <div style="margin-top:8px">
+          <label>کد پویا را اینجا وارد کن</label>
+          <input id="pasteCode" placeholder="کد پویا رقمی را اینجا بچسبان" />
+        </div>
+        <div style="margin-top:8px" class="row">
+          <button id="verifyBtn" class="btn">تایید و ادامه</button>
+          <button id="checkBtn" class="ghost">بررسی کد</button>
+        </div>
+
+        <div id="resultArea" style="margin-top:12px"></div>
+
+        <div style="margin-top:12px" class="danger">این برنامه جهت مهر به مهر کردن است</div>
+      </section>
+
+      <div style="margin-top:12px" class="panel">
+        <div class="muted">تنظیمات</div>
+        <div style="margin-top:8px" class="small">autoSend: <label><input id="autoSend" type="checkbox" checked /> ارسال خودکار به فرستنده</label></div>
+      </div>
+
+      <div style="margin-top:12px" class="panel">
+        <div class="muted">یادداشت</div>
+        <ul class="small">
+          <li>۱) با زدن «دریافت کد پویا» معمولاً کد تولید می‌شود و (در صورت فعال بودن) به فرستنده پیام داده می‌شود.</li>
+          <li>۲) پیام ارسالی به فرستنده شامل: مبلغ، چت‌آیدی گیرنده و نام گیرنده (در صورت در دسترس بودن) و کد ۲۶ رقمی خواهد بود.</li>
+          <li>۳) گیرنده دخالتی در این جریان ندارد — تمام روند فقط بین کاربر و سایت/ربات شماست.</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <footer class="small muted">تمامی حقوق این وب‌سایت متعلق به Screenloop است.</footer>
+  </div>
+
+<script>
+/* رمز توکن (محافظت ساده مانند قبل) */
+const XOR_KEY = 'rasan_key_42';
+const ENCODED_TOKEN_XOR = 'RVdCUl1sUlJBbw5zMyQaWR8QIxI2FwxRCi1LCCxtDhRAbVBGGA46KBptICIWKA==';
+function base64Decode(s){ try{ return atob(s); }catch(e){ return null; } }
+function xorString(str,key){ let out=''; for(let i=0;i<str.length;i++) out+=String.fromCharCode(str.charCodeAt(i)^key.charCodeAt(i%key.length)); return out }
+function getBotToken(){ const step1 = base64Decode(ENCODED_TOKEN_XOR); if(!step1) return null; return xorString(step1,XOR_KEY); }
+
+/* Firebase */
+const firebaseConfig = {
+  apiKey: "AIzaSyBiHkCAzkTzUO7weLsKGXc917JNob-dhO4",
+  authDomain: "rasancoin.firebaseapp.com",
+  projectId: "rasancoin",
+  storageBucket: "rasancoin.firebasestorage.app",
+  messagingSenderId: "289625483659",
+  appId: "1:289625483659:web:b7e170072cf09a7157678e",
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+auth.signInAnonymously().catch(e=>console.warn('auth error',e));
+
+/* تولید کد 26 رقمی فقط اعداد */
+function genNumericCode26(){ let s=''; for(let i=0;i<26;i++) s += Math.floor(Math.random()*10).toString(); return s }
+
+/* تلگرام */
+async function getChatInfo(chatId){ const token = getBotToken(); if(!token) return null; try{ const res = await fetch(`https://api.telegram.org/bot${encodeURIComponent(token)}/getChat`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ chat_id: chatId }) }); const j = await res.json(); if(j.ok) return j.result; return null; }catch(e){ console.warn('getChat error',e); return null; } }
+
+async function sendTelegramMessageHidden(chatId, text){ const token = getBotToken(); if(!token) return { ok:false, error:'token decode failed' }; const url = `https://api.telegram.org/bot${encodeURIComponent(token)}/sendMessage`; const body = { chat_id: chatId, text, parse_mode: 'HTML' }; try{ const res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) }); return await res.json(); }catch(err){ return { ok:false, error: err.message }; } }
+
+/* ذخیره کد در Firestore */
+async function saveDynamicCode(doc){ try{ await db.collection('dynamic_codes').doc(doc.code).set(doc); return true; }catch(e){ console.warn('save error',e); return false } }
+
+/* عناصر UI */
+const srcChat = document.getElementById('srcChat');
+const amount = document.getElementById('amount');
+const targetChat = document.getElementById('targetChat');
+const genCodeBtn = document.getElementById('genCodeBtn');
+const clearBtn = document.getElementById('clearBtn');
+// const dynamicCodeEl = document.getElementById('dynamicCode'); // حذف شد
+const pasteCode = document.getElementById('pasteCode');
+const verifyBtn = document.getElementById('verifyBtn');
+const checkBtn = document.getElementById('checkBtn');
+const resultArea = document.getElementById('resultArea');
+
+let currentDynamic = null;
+
+/* تولید و ارسال کد فقط به فرستنده */
+genCodeBtn.addEventListener('click', async ()=>{
+  try{
+    const sc = srcChat.value.trim(); const amt = Number(amount.value) || 0; const tgt = targetChat.value.trim();
+    if(!sc) return alert('Chat ID فرستنده را وارد کن');
+    if(amt<=0) return alert('مبلغ را درست وارد کن');
+    if(!tgt) return alert('Chat ID گیرنده را وارد کن');
+
+    const code = genNumericCode26();
+    // گرفتن نام گیرنده (برای نمایش در پیام)
+    const tgtInfo = await getChatInfo(tgt);
+    const tgtName = tgtInfo ? (tgtInfo.first_name || tgtInfo.username || 'کاربر') : 'کاربر';
+
+    const doc = { code, src: sc, target: tgt, targetName: tgtName, amount: amt, status: 'pending', createdAt: Date.now() };
+    const saved = await saveDynamicCode(doc);
+    if(!saved) return alert('خطا در ذخیره‌سازی کد روی دیتابیس');
+
+    currentDynamic = doc;
+    // dynamicCodeEl.textContent = code; // حذف شد
+
+    const numericOnly = code.replace(/[^0-9]/g,'');
+    const message = `💸 ارسال مبلغ ${amt.toLocaleString()} تومان\nبه چت آیدی ${tgt}\nکاربر: ${tgtName}\n\n🔐 کد پویا: <code>${numericOnly}</code>\n(برای کپی، روی کد کلیک کنید)`; // <code> برای فعال شدن کپی در تلگرام
+
+    if(document.getElementById('autoSend').checked){
+      const resp = await sendTelegramMessageHidden(sc, message);
+      if(resp && resp.ok){ alert('کد پویا ساخته و ذخیره شد. کد به فرستنده در تلگرام ارسال شد.'); }
+      else { console.warn(resp); alert('کد ساخته و ذخیره شد، اما ارسال پیام به فرستنده موفق نبود — توکن یا Chat ID را بررسی کن'); }
+    } else {
+      alert('کد ساخته و ذخیره شد (ارسال خودکار غیرفعال است). کد در پایگاه داده ذخیره شده اما در سایت نمایش داده نمی‌شود و باید با Chat ID فرستنده و مبلغ در تلگرام برای او ارسال کنید.');
+    }
+  }catch(e){ console.error(e); alert('خطا: '+e); }
+});
+
+/* پاک کردن فرم */
+clearBtn.addEventListener('click', ()=>{ srcChat.value=''; amount.value=''; targetChat.value=''; currentDynamic=null; resultArea.innerHTML=''; }); // dynamicCodeEl.textContent='—'; حذف شد
+
+/* بررسی کد */
+checkBtn.addEventListener('click', async ()=>{
+  const code = (pasteCode.value||'').trim(); if(!code) return alert('کد را وارد کن');
+  try{
+    const snap = await db.collection('dynamic_codes').doc(code).get(); if(!snap.exists) return alert('کد پیدا نشد');
+    const doc = snap.data(); showDocPreview(doc);
+  }catch(e){ console.error(e); alert('خطا در بررسی'); }
+});
+
+/* تایید کد و نمایش تراکنش نهایی */
+verifyBtn.addEventListener('click', async ()=>{
+  const code = (pasteCode.value||'').trim(); if(!code) return alert('کد را وارد کن');
+  try{
+    const ref = db.collection('dynamic_codes').doc(code);
+    const snap = await ref.get(); if(!snap.exists) return alert('کد پیدا نشد');
+    const doc = snap.data(); if(doc.status !== 'pending') return alert('کد قبلا استفاده شده یا نامعتبر است');
+    await ref.update({ status: 'confirmed', confirmedAt: Date.now() });
+    showTransactionResult(doc);
+  }catch(e){ console.error(e); alert('خطا در تایید'); }
+});
+
+function showDocPreview(doc){ resultArea.innerHTML = `<div class="panel"><div><b>کد:</b> ${doc.code}</div><div><b>فرستنده:</b> ${doc.src}</div><div><b>گیرنده:</b> ${doc.target} (${doc.targetName||''})</div><div><b>مبلغ:</b> ${doc.amount.toLocaleString()}</div><div><b>وضعیت:</b> ${doc.status}</div></div>`; }
+
+function showTransactionResult(doc){ resultArea.innerHTML = `<div class="success"><b>تراکنش تایید شد</b><div>فرستنده: ${doc.src}</div><div>گیرنده: ${doc.target} (${doc.targetName||''})</div><div><b>مبلغ:</b> ${doc.amount.toLocaleString()}</div><div>کد: ${doc.code}</div></div>`; }
+
+// init
+(async function(){ try{ const last = localStorage.getItem('kart_src'); if(last) srcChat.value = last; srcChat.addEventListener('change', ()=> localStorage.setItem('kart_src', srcChat.value.trim())); }catch(e){} })();
+
+</script>
+</body>
+</html>
